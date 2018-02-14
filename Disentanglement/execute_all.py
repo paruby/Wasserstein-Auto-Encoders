@@ -497,16 +497,15 @@ class WAE_MMD(object):
         self.Q_FC1 = tf.layers.dense(inputs=self.x_flattened, units=1200, activation=tf.nn.relu)
         self.Q_FC2 = tf.layers.dense(inputs=self.Q_FC1, units=1200, activation=tf.nn.relu)
 
-        # tanh activation because everything should be in interval [-1, 1]
         self.z_mean = tf.layers.dense(inputs=self.Q_FC2, units=self.K, activation=tf.nn.tanh, name="z_mean")
         self.z_logvar = tf.layers.dense(inputs=self.Q_FC2, units=self.K, name="z_logvar")
 
 
-        # We want to add random noise in the interval [-t, +t]
-        # and for our L1 loss to encourage not using dimentions by setting this to [-1, +1]
-        # so make eps ~ [-1, +1] on every dimension so that exp(0) * eps ~[-1, 1]
         self.eps = tf.random_normal(shape=tf.shape(self.z_mean))
         self.z_sample = tf.add(self.z_mean, tf.exp(tf.clip_by_value(self.z_logvar, -16, 10) / 2) * self.eps, name="z_sample")
+        # weight clipping prevents numerical errors due to backprop when 
+        # logvars become too negative
+
 
     def _decoder_init(self):
         self.P_FC1 = tf.layers.dense(inputs=self.z_sample, units=1200, activation=tf.nn.tanh)
