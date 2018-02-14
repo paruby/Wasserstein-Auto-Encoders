@@ -1,7 +1,4 @@
 readme = """
-Purpose of running this experiment:
-
-I am going to implement the disentanglement metric proposed by the beta-VAE paper
 
 """
 
@@ -673,7 +670,7 @@ def lerp(v1, v2, steps):
     return (v1 * t) + (v2 * (1-t))
 
 if __name__=="__main__":
-    DATA_FOLDER = "./"
+    DATA_FOLDER = "../../" # <- better to replace this with absolute link to dataset location 
 
     DATASET, LATENT_DIMENSIONALITY, LAMBDA_IMQ, LAMBDA_L1, BATCH_SIZE = [str(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5])]
 
