@@ -674,7 +674,7 @@ def lerp(v1, v2, steps):
     return (v1 * t) + (v2 * (1-t))
 
 if __name__=="__main__":
-    DATA_FOLDER = "/lustre/home/pruben/CausalVAE/code/Distentangled/datasets/"
+    DATA_FOLDER = "./"
 
     DATASET, LATENT_DIMENSIONALITY, LAMBDA_IMQ, LAMBDA_L1, BATCH_SIZE = [str(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]), int(sys.argv[5])]
 
@@ -694,21 +694,7 @@ if __name__=="__main__":
     '''
 
 
-    if DATASET == "fading_square":
-        data_in_order = np.load(DATA_FOLDER + "/custom_synthetic_data/fading_square.npy")
-        n_data = len(data_in_order)
-        shuffled_data = np.copy(data_in_order)
-        np.random.shuffle(shuffled_data)
-        train_data = shuffled_data[0:((9*n_data)//10)]
-        test_data = shuffled_data[((9*n_data)//10):]
-    elif DATASET == "4_fading_squares":
-        data_in_order = np.load(DATA_FOLDER + "/custom_synthetic_data/4_fading_squares.npy")
-        n_data = len(data_in_order)
-        shuffled_data = np.copy(data_in_order)
-        np.random.shuffle(shuffled_data)
-        train_data = shuffled_data[0:((9*n_data)//10)]
-        test_data = shuffled_data[((9*n_data)//10):]
-    elif DATASET == 'dsprites':
+    if DATASET == 'dsprites':
         dsprites_zip = np.load(DATA_FOLDER + "dsprites.npz", encoding='bytes')
         imgs = dsprites_zip['imgs']
         data_in_order = imgs.copy()

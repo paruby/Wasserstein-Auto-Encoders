@@ -94,7 +94,7 @@ class Disentanglement(object):
         self.optimiser_vars5 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='optimiser5')
 
     def _data_init(self):
-        DATA_FOLDER = "/lustre/home/pruben/CausalVAE/code/Distentangled/datasets/"
+        DATA_FOLDER = "./"
         dataset_zip = np.load(DATA_FOLDER + "dsprites.npz", encoding='bytes')
         self.imgs = dataset_zip['imgs']
         latents_values = dataset_zip['latents_values']
