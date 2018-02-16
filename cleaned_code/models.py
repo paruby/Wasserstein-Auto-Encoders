@@ -68,6 +68,10 @@ def loss_init(model):
     model.total_loss = tf.add_n(all_losses)
 
 def optimizer_init(model):
+    if model.opts['optimizer'] == 'adam':
+        model.learning_rate = tf.placeholder(tf.float32)
+        model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.objective)
+
 
 
 def _mmd_init(model, C):
