@@ -60,17 +60,17 @@ def loss_init(model):
     all_losses.append(model.loss_regulariser)
 
     if model.opts['z_logvar_regularisation'] == 'L1':
-        model.z_logvar_loss = tf.reduce_mean(tf.reduce_sum(tf.abs(model.z_logvar), axis=1), name="z_logvar_loss")
+        model.z_logvar_loss = model.opts['lambda_logvar_regularisation'] * tf.reduce_mean(tf.reduce_sum(tf.abs(model.z_logvar), axis=1), name="z_logvar_loss")
         all_losses.append(model.z_logvar_loss)
     elif model.opts['z_logvar_regularisation'] == 'L2_squared':
-        model.z_logvar_loss = tf.reduce_mean(tf.reduce_sum(tf.square(model.z_logvar), axis=1), name="z_logvar_loss")
+        model.z_logvar_loss = model.opts['lambda_logvar_regularisation'] * tf.reduce_mean(tf.reduce_sum(tf.square(model.z_logvar), axis=1), name="z_logvar_loss")
         all_losses.append(model.z_logvar_loss)
-    model.total_loss = tf.add_n(all_losses)
+    model.loss_total = tf.add_n(all_losses)
 
 def optimizer_init(model):
     if model.opts['optimizer'] == 'adam':
         model.learning_rate = tf.placeholder(tf.float32)
-        model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.objective)
+        model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.loss_total)
 
 
 
@@ -233,15 +233,15 @@ def _z_sample_init(model):
     else:
         if model.opts['logvar-clipping'] is not None:
             # clipping of logvariances to prevent numerical errors
-            clip_lower, clip_upper = opts['logvar-clipping']
+            clip_lower, clip_upper = model.opts['logvar-clipping']
             model.z_logvar = tf.clip_by_value(model.z_logvar, clip_lower, clip_upper)
 
         if model.opts['encoder_distribution'] == 'gaussian':
             eps = tf.random_normal(shape=tf.shape(model.z_mean))
-            noise = tf.exp(z_logvar  / 2) * eps
+            noise = tf.exp(model.z_logvar  / 2) * eps
         elif model.opts['encoder_distribution'] == 'uniform':
             eps = tf.random_uniform(shape=tf.shape(model.z_mean))
-            noise = tf.exp(z_logvar) * eps
+            noise = tf.exp(model.z_logvar) * eps
         model.z_sample = tf.add(model.z_mean, noise, name="z_sample")
     return model.z_sample
 

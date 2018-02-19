@@ -1,3 +1,6 @@
+# Requirements
+Python 3.5+ 
+
 # Structure of repository
 
 wae.py contains code to build wae model. Model will actually be built by calling initialisation functions from other files, eg models.py.

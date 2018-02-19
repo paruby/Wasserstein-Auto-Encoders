@@ -4,40 +4,58 @@ import os
 import time
 import sys
 import models
+import config
+import utils
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class Model(object):
-    def __init__(self, opts, ...):
+    def __init__(self, opts):
         self.sess = tf.Session()
 
         self.opts = opts
+        utils.opts_check(self)
         self.z_dim = self.opts['z_dim']
         self.batch_size = self.opts['batch_size']
-        self.train_data, self.test_data = utils.load_data(self, seed=0)#TODO
-        
-        self.fixed_test_sample = self.sample_minibatch(test=True, seed=0)
-        self.fixed_train_sample = self.sample_minibatch(test=False, seed=0)
-        self.fixed_codes = self.sample_codes(seed=0)
+        self.train_data, self.test_data = utils.load_data(self, seed=0)
 
         self.data_dims = self.train_data.shape[1:]
-        self.input = self.input = tf.placeholder(tf.float32, (None,) + self.data_dims, name="input")
+        self.input = tf.placeholder(tf.float32, (None,) + self.data_dims, name="input")
 
         self.losses_train = []
         self.losses_test_random = []
         self.losses_test_fixed = []
 
-
+        self.experiment_path = self.opts['experiment_path']
+        utils.create_directories(self)
 
 
         models.encoder_init(self)
         models.decoder_init(self)
-        models.pror_init(self)
+        models.prior_init(self)
         models.loss_init(self)
         models.optimizer_init(self)
+
+        self.fixed_test_sample = self.sample_minibatch(test=True, seed=0)
+        self.fixed_train_sample = self.sample_minibatch(test=False, seed=0)
+        self.fixed_codes = self.sample_codes(seed=0)
+
+
         if self.opts['make_pictures_every'] is not None:
             utils.plot_all_init(self)
 
+        self.saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
         self.sess.run(tf.global_variables_initializer())
 
+    def save(self, it):
+        model_path = "checkpoints/"
+        save_path = self.saver.save(self.sess, model_path, global_step=it)
+        print("Model saved to: %s" % save_path)
+
+    def restore(self, model_path):
+        self.saver.restore(self.sess, model_path)
+        print("Model restored from : %s" % model_path)
 
     def train(self):
         if self.opts['optimizer'] == 'adam':
@@ -45,7 +63,11 @@ class Model(object):
             iterations_list = [i[1] for i in self.opts['learning_rate_schedule']]
             total_num_iterations = iterations_list[-1]
             it = 0
+            lr_counter = 0
+            lr = learning_rates[lr_counter]
+            lr_iterations = iterations_list[lr_counter]
             while it < total_num_iterations:
+                it += 1
                 if it > lr_iterations:
                     lr_counter += 1
                     lr = learning_rates[lr_counter]
@@ -53,16 +75,19 @@ class Model(object):
 
                 self.sess.run(
                     self.train_step,
-                    feed_dict={self.learning_rate: learning_rate,
-                               self.input: self.sample_data(self.batch_size)}
+                    feed_dict={self.learning_rate: lr,
+                               self.input: self.sample_minibatch(self.batch_size)}
                     )
 
                 if (self.opts['print_log_information'] is True) and (it % 100 == 0):
                     utils.print_log_information(self, it)
 
                 if self.opts['make_pictures_every'] is not None:
-                    if (it > 0) and (it % self.opts['make_pictures_every'] == 0):
+                    if it % self.opts['make_pictures_every'] == 0:
                         utils.plot_all(self, it)
+
+                if it % self.opts['save_every'] == 0:
+                    self.save(it)
 
 
     def encode(self, images, mean=True):
@@ -70,7 +95,6 @@ class Model(object):
             return self.sess.run(self.z_sample, feed_dict={self.input: images})
         if mean is True:
             return self.sess.run(self.z_mean, feed_dict={self.input: images})
-
 
     def decode(self, codes):
         return self.sess.run(tf.nn.sigmoid(self.x_logits_img_shape), feed_dict={self.z_sample: codes})
@@ -100,3 +124,6 @@ class Model(object):
         if seed is not None:
             np.random.set_state(st0)
         return sample
+
+model = Model(config.opts)
+model.train()

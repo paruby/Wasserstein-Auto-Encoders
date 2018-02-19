@@ -1,5 +1,63 @@
-fixed_import tensorflow as tf
+import tensorflow as tf
 import numpy as np
+import os
+import pathlib
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+
+def load_data(model, seed=None):
+    # set seed
+    if seed is not None:
+        st0 = np.random.get_state()
+        np.random.seed(seed)
+
+    dataset = model.opts['dataset']
+    if dataset == 'dsprites':
+        try:
+            dsprites_zip = np.load('datasets/dsprites.npz', encoding='bytes')
+        except FileNotFoundError:
+            print("Dataset file does not exist. You can download it here: https://github.com/deepmind/dsprites-dataset/ Save dsprites_ndarray_....npz in datasets folder as dsprites.npz")
+        data = dsprites_zip['imgs']
+
+    elif dataset == 'celebA':
+        try:
+            data = np.load('datasets/celebA.npy')
+        except FileNotFoundError:
+            print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA.npy in datasets folder")
+
+    elif dataset == 'celebA_mini':
+        try:
+            data = np.load('datasets/celebA_mini.npy')
+        except FileNotFoundError:
+            print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA_mini.npy in datasets folder")
+
+    elif dataset == 'fading_squares':
+        try:
+            data = np.load('datasets/fading_squares.npy')
+        except FileNotFoundError:
+            print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save fading_squares.npy in datasets folder")
+    # last channel should be 1d if images are black/white
+    if len(data.shape) == 3:
+        data = data[:, :, :, None]
+    n_data = len(data)
+    np.random.shuffle(data)
+    # 90% test/train split
+    train_data = data[0:((9*n_data)//10)]
+    test_data = data[((9*n_data)//10):]
+
+    # reset seed
+    if seed is not None:
+        np.random.set_state(st0)
+    return train_data, test_data
+
+def create_directories(model):
+    pathlib.Path(model.experiment_path).mkdir(parents=True, exist_ok=True)
+    os.chdir(model.experiment_path)
+    pathlib.Path('output/plots/').mkdir(parents=True, exist_ok=True)
+    pathlib.Path('checkpoints').mkdir(exist_ok=True)
 
 def print_log_information(model, it):
     # print train and test error to logs
@@ -12,21 +70,21 @@ def print_log_information(model, it):
     assert len(batches) == len(files)
 
     for j in range(len(batches)):
-        loss_reconstruction, loss_regulariser, total_loss = model.sess.run([model.loss_reconstruction,
+        loss_reconstruction, loss_regulariser, loss_total = model.sess.run([model.loss_reconstruction,
                                                                            model.loss_regulariser,
-                                                                           model.total_loss],
+                                                                           model.loss_total],
                                                                            feed_dict={model.input: batches[j]})
-        losses[j].append(total_loss)
+        losses[j].append(loss_total)
 
         if hasattr(model, 'z_logvar_loss'):
             z_logvar_loss = model.sess.run(model.z_logvar_loss, feed_dict={model.input: batches[j]})
             with open(files[j], "a") as training_loss_log:
                 training_loss_log.write("\nIteration %i \t Regulariser loss: %g \t Logvar penalty loss: %g \t Reconstruction loss: %g \t Total: %g" %
-                                        (it, loss_regulariser, z_logvar_loss, loss_reconstruction, total_loss))
+                                        (it, loss_regulariser, z_logvar_loss, loss_reconstruction, loss_total))
         else:
             with open(files[j], "a") as training_loss_log:
-                training_loss_log.write("\nIteration %i \t Logvar penalty loss: %g \t Reconstruction loss: %g \t Total: %g" %
-                                        (it, loss_regulariser, loss_reconstruction, total_loss))
+                training_loss_log.write("\nIteration %i \t Regulariser loss: %g \t Reconstruction loss: %g \t Total: %g" %
+                                        (it, loss_regulariser, loss_reconstruction, loss_total))
 
     # TODO print max, min and average logvars for each dimension
 
@@ -76,7 +134,7 @@ def plot_all_init(model):
 def plot_all(model, filename_appendage):
     fixed_test_sample = model.fixed_test_sample[0:30]
     fixed_train_sample = model.fixed_train_sample[0:30]
-    fixed_codes = model.fixed_codes[0:30]
+    fixed_codes = model.fixed_codes[0:60]
 
     fig = plt.figure(figsize=(50, 50))
     fig.suptitle("Cols: {Test, Train, Prior samples}.  Rows: {Reconstruction, Interpolations, Axis walks}", fontsize=40, fontweight='bold')
@@ -106,12 +164,12 @@ def plot_all(model, filename_appendage):
 
     for j in range(0, 60, 2):
         ax_real = plt.Subplot(fig, inner[j])
-        ax_real.imshow(fixed_train_sample[j//2, :, :], cmap="gray")
+        ax_real.imshow(_imshow_process(fixed_train_sample[j//2]) , cmap="gray", vmin=0, vmax=1)
         ax_real.axis("off")
         fig.add_subplot(ax_real)
 
         ax_recon = plt.Subplot(fig, inner[j + 1])
-        ax_recon.imshow(train_reconstruction_images[j//2, :, :], cmap="gray")
+        ax_recon.imshow(_imshow_process(train_reconstruction_images[j//2]) , cmap="gray", vmin=0, vmax=1)
         ax_recon.axis("off")
         fig.add_subplot(ax_recon)
 
@@ -120,12 +178,12 @@ def plot_all(model, filename_appendage):
 
     for j in range(60, 100, 2):
         ax_real = plt.Subplot(fig, inner[j])
-        ax_real.imshow(sample_train_images[j//2 - 30, :, :], cmap="gray")
+        ax_real.imshow(_imshow_process(sample_train_images[j//2 - 30]) , cmap="gray", vmin=0, vmax=1)
         ax_real.axis("off")
         fig.add_subplot(ax_real)
 
         ax_recon = plt.Subplot(fig, inner[j + 1])
-        ax_recon.imshow(sample_reconstructed_images[j//2 - 30, :, :], cmap="gray")
+        ax_recon.imshow(_imshow_process(sample_reconstructed_images[j//2 - 30]) , cmap="gray", vmin=0, vmax=1)
         ax_recon.axis("off")
         fig.add_subplot(ax_recon)
 
@@ -140,12 +198,12 @@ def plot_all(model, filename_appendage):
 
     for j in range(0, 60, 2):
         ax_real = plt.Subplot(fig, inner[j])
-        ax_real.imshow(fixed_test_sample[j//2, :, :], cmap="gray")
+        ax_real.imshow(_imshow_process(fixed_test_sample[j//2]) , cmap="gray", vmin=0, vmax=1)
         ax_real.axis("off")
         fig.add_subplot(ax_real)
 
         ax_recon = plt.Subplot(fig, inner[j + 1])
-        ax_recon.imshow(test_reconstruction_images[j//2, :, :], cmap="gray")
+        ax_recon.imshow(_imshow_process(test_reconstruction_images[j//2]) , cmap="gray", vmin=0, vmax=1)
         ax_recon.axis("off")
         fig.add_subplot(ax_recon)
 
@@ -154,12 +212,12 @@ def plot_all(model, filename_appendage):
 
     for j in range(60, 100, 2):
         ax_real = plt.Subplot(fig, inner[j])
-        ax_real.imshow(sample_test_images[j//2 - 30, :, :], cmap="gray")
+        ax_real.imshow(_imshow_process(sample_test_images[j//2 - 30]) , cmap="gray", vmin=0, vmax=1)
         ax_real.axis("off")
         fig.add_subplot(ax_real)
 
         ax_recon = plt.Subplot(fig, inner[j + 1])
-        ax_recon.imshow(sample_reconstructed_images[j//2 - 30, :, :], cmap="gray")
+        ax_recon.imshow(_imshow_process(sample_reconstructed_images[j//2 - 30]) , cmap="gray", vmin=0, vmax=1)
         ax_recon.axis("off")
         fig.add_subplot(ax_recon)
 
@@ -172,7 +230,7 @@ def plot_all(model, filename_appendage):
 
     for j in range(0, 60, 1):
         ax = plt.Subplot(fig, inner[j])
-        ax.imshow(fixed_random_sample_images[j, :, :], cmap="gray")
+        ax.imshow(_imshow_process(fixed_random_sample_images[j]) , cmap="gray", vmin=0, vmax=1)
         ax.axis("off")
         fig.add_subplot(ax)
 
@@ -183,7 +241,7 @@ def plot_all(model, filename_appendage):
 
     for j in range(60, 100, 1):
         ax = plt.Subplot(fig, inner[j])
-        ax.imshow(varying_random_sample_images[j - 60, :, :], cmap="gray")
+        ax.imshow(_imshow_process(varying_random_sample_images[j - 60]) , cmap="gray", vmin=0, vmax=1)
         ax.axis("off")
         fig.add_subplot(ax)
 
@@ -202,19 +260,19 @@ def plot_all(model, filename_appendage):
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j, :, :]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
     for i in range(5, 10):
-        m1 = model.encode(model.sample_data(batch_size=1), mean=True)
-        m2 = model.encode(model.sample_data(batch_size=1), mean=True)
+        m1 = model.encode(model.sample_minibatch(batch_size=1), mean=True)
+        m2 = model.encode(model.sample_minibatch(batch_size=1), mean=True)
         embeddings = lerp(m1, m2, 10)
         outputs = model.decode(embeddings)
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
@@ -230,19 +288,19 @@ def plot_all(model, filename_appendage):
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
     for i in range(5, 10):
-        m1 = model.encode(model.sample_data(batch_size=1, test=True), mean=True)
-        m2 = model.encode(model.sample_data(batch_size=1, test=True), mean=True)
+        m1 = model.encode(model.sample_minibatch(batch_size=1, test=True), mean=True)
+        m2 = model.encode(model.sample_minibatch(batch_size=1, test=True), mean=True)
         embeddings = lerp(m1, m2, 10)
         outputs = model.decode(embeddings)
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
@@ -260,7 +318,7 @@ def plot_all(model, filename_appendage):
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
@@ -272,7 +330,7 @@ def plot_all(model, filename_appendage):
 
         for j in range(10):
             ax = plt.Subplot(fig, inner[10*i + j])
-            ax.imshow(outputs[j, :, :], cmap='gray')
+            ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
             ax.axis("off")
             fig.add_subplot(ax)
 
@@ -281,7 +339,7 @@ def plot_all(model, filename_appendage):
     if model.opts['plot_axis_walks'] is True:
         axis_walk_range = model.opts['axis_walk_range']
         # Training data
-        inner = gridspec.GridSpecFromSubplotSpec(model.K, 10, subplot_spec=outer[6], wspace=0.1, hspace=0.1)
+        inner = gridspec.GridSpecFromSubplotSpec(model.z_dim, 10, subplot_spec=outer[6], wspace=0.1, hspace=0.1)
 
         mean = model.encode(model.sample_minibatch(batch_size=1), mean=True)
 
@@ -292,7 +350,7 @@ def plot_all(model, filename_appendage):
 
             for j in range(10):
                 ax = plt.Subplot(fig, inner[10*axis + j])
-                ax.imshow(outputs[j, :, :], cmap='gray')
+                ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
                 ax.axis("off")
                 fig.add_subplot(ax)
 
@@ -308,7 +366,7 @@ def plot_all(model, filename_appendage):
 
             for j in range(10):
                 ax = plt.Subplot(fig, inner[10*axis + j])
-                ax.imshow(outputs[j, :, :], cmap='gray')
+                ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
                 ax.axis("off")
                 fig.add_subplot(ax)
 
@@ -317,15 +375,15 @@ def plot_all(model, filename_appendage):
         # Random samples from the latent space
         inner = gridspec.GridSpecFromSubplotSpec(model.z_dim, 10, subplot_spec=outer[8], wspace=0.1, hspace=0.1)
 
-        mean = mode.sample_codes(batch_size=1)
-        for axis in range(model.K):
+        mean = model.sample_codes(batch_size=1)
+        for axis in range(model.z_dim):
             repeat_mean = np.repeat(mean, 10, axis=0)
             repeat_mean[:, axis] = np.linspace(-axis_walk_range,axis_walk_range,10)
             outputs = model.sess.run(tf.nn.sigmoid(model.x_logits_img_shape),
                                     feed_dict={model.z_sample: repeat_mean})
             for j in range(10):
                 ax = plt.Subplot(fig, inner[10*axis + j])
-                ax.imshow(outputs[j, :, :], cmap='gray')
+                ax.imshow(_imshow_process(outputs[j]) , cmap="gray", vmin=0, vmax=1)
                 ax.axis("off")
                 fig.add_subplot(ax)
 
@@ -350,10 +408,10 @@ def plot_all(model, filename_appendage):
 
         inner = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=outer[10], wspace=0.1, hspace=0.1)
 
-        real_embeddings = model.encode(model.sample_minibatch(batch_size=100))
+        real_embeddings = model.encode(model.sample_minibatch(batch_size=100), mean=False)
         prior_samples = model.sample_codes(batch_size=100)
 
-        real_projections, prior_projections = model.least_gaussian_2d_subspace(real_embeddings, prior_samples)
+        real_projections, prior_projections = least_gaussian_2d_subspace(model, real_embeddings, prior_samples)
 
         ax = plt.Subplot(fig, inner[0])
         ax.scatter(real_projections[:,0], real_projections[:,1], s=50)
@@ -365,13 +423,13 @@ def plot_all(model, filename_appendage):
 
 
 
-    fig.savefig("output/plots/" + filename_appendage + ".png")
+    fig.savefig("output/plots/" + str(filename_appendage) + ".png")
     plt.close(fig)
     plt.close("all")
 
     return
 
-def _least_gaussian_2d_subspace(model, real_embeddings, prior_samples):
+def least_gaussian_2d_subspace(model, real_embeddings, prior_samples):
     # adapted from ilya's https://github.com/tolstikhin/adagan/blob/master/pot.py#L1349
     real_embedding_var = model._proj_real_embedding_var
     prior_samples_var = model._proj_prior_samples_var
@@ -410,3 +468,90 @@ def _least_gaussian_2d_subspace(model, real_embeddings, prior_samples):
     prior_projections = np.matmul(prior_samples, proj_mat)
 
     return real_projections, prior_projections
+
+def _imshow_process(tensor):
+    '''
+    imshow throws an error if the color channel has dimension 1.
+    This function does nothing if the color channel dimension is NOT 1
+    if the color channel dimension is 1, it returns the slice removing this dim
+    '''
+    assert len(tensor.shape) == 3
+    if tensor.shape[-1] == 1:
+        return tensor[:,:,0]
+    else:
+        return tensor
+
+
+def slerp(v1, v2, steps):
+    """
+    :param v1: start point, 1xN numpy array
+    :param v2: end point, 1xN numpy array
+    :param steps: number of steps to interpolate along
+    :return: Returns the vectors along the spherical interpolation starting at v1 and ending at v2
+    Formula taken from wikipedia article https://en.wikipedia.org/wiki/Slerp
+    """
+
+    assert v1.shape == v2.shape
+    assert v1.shape[0] == 1
+
+    v1_norm = v1 / np.sqrt(np.sum(v1 ** 2))
+    v2_norm = v2 / np.sqrt(np.sum(v2 ** 2))
+    omega = np.arccos(np.dot(v1_norm, v2_norm.T))
+    t = np.linspace(1, 0, steps)
+
+    return (v1 * (np.sin(t * omega) / np.sin(omega)).T) + (v2 * (np.sin((1-t) * omega) / np.sin(omega)).T)
+
+def lerp(v1, v2, steps):
+    """
+    :param v1: start point, 1xN numpy array
+    :param v2: end point, 1xN numpy array
+    :param steps: number of steps to interpolate along
+    :return: Returns the vectors along the linear interplotaitno starting at v1 and ending at v2
+    """
+
+    assert v1.shape == v2.shape
+    assert v1.shape[0] == 1
+
+    t = np.linspace(1, 0, steps)[:, None]
+
+    return (v1 * t) + (v2 * (1-t))
+
+def opts_check(model):
+    opts = model.opts
+    assert type(opts['save_every']) is int
+    assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini']
+    assert type(opts['experiment_path']) is str
+    assert type(opts['z_dim']) is int
+    assert opts['print_log_information'] in [True, False]
+    assert (type(opts['make_pictures_every']) is int) or (opts['make_pictures_every'] is None)
+    assert type(opts['plot_axis_walks']) is bool
+    if opts['plot_axis_walks'] is True: #if z_dim >> 10, plotting axis walks will be long
+        assert opts['axis_walk_range'] > 0
+    assert type(opts['plot_losses']) is bool
+    if opts['plot_losses'] is True:
+        assert opts['print_log_information'] is True
+    assert type(opts['batch_size']) is int
+    assert opts["encoder_architecture"] in ['small_convolutional_celebA', 'FC_dsprites']
+    assert opts["decoder_architecture"] in ['small_convolutional_celebA', 'FC_dsprites']
+    assert opts['z_mean_activation'] in ['tanh', None]
+    assert opts['encoder_distribution'] in ['deterministic', 'gaussian', 'uniform']
+    assert opts['logvar-clipping'] is None or (len(opts['logvar-clipping']) == 2 and all([type(i) is int for i in opts['logvar-clipping']]))
+    assert opts['z_prior'] in ['gaussian', 'uniform']
+    assert opts['loss_reconstruction'] in ['bernoulli', 'L2_squared']
+    assert opts['loss_regulariser'] in ['VAE', 'beta_VAE', 'WAE_MMD'] # either KL divergence of VAE or divergence of WAE
+    if opts['loss_regulariser'] == 'beta_VAE':
+        assert type(opts['beta']) is float
+    if opts['loss_regulariser'] == 'WAE_MMD':
+        assert type(opts['lambda_imq']) is float
+        assert type(opts['IMQ_length_params']) is list # parameters should be scaled according to z_dim
+        assert all(type(i) is float for i in opts['IMQ_length_params'])
+    assert opts['z_logvar_regularisation'] in [None, "L1", "L2_squared"]
+    if opts['z_logvar_regularisation'] is not None:
+        assert type(opts['lambda_logvar_regularisation']) is float
+    assert opts['optimizer'] in ['adam']
+    if opts['optimizer'] == 'adam':
+        assert type(opts['learning_rate_schedule']) is list
+        assert all([type(l) is tuple and len(l)==2 for l in opts['learning_rate_schedule']])
+        assert all([opts['learning_rate_schedule'][i][1] < opts['learning_rate_schedule'][i+1][1] for i in range(len(opts['learning_rate_schedule'])-1)])
+        # opts['learning_rate_schedule'] = [(learning_rate, iteration # that this is valid for)]
+        # e.g. opts['learning_rate_schedule'] = [(1e-4, 20000), (3e-5, 40000), (1e-5, 60000)]
