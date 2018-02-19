@@ -253,7 +253,7 @@ def _decoder_small_convolutional_celebA_init(model):
 
     P_conv1 = tf.nn.elu(
                 tf.layers.batch_normalization(
-                    tf.layers.conv2d(inputs=self.P_dense1_reshape,
+                    tf.layers.conv2d(inputs=P_dense1_reshape,
                                      filters=256,
                                      kernel_size=[3, 3],
                                      padding="same")))

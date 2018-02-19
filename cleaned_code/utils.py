@@ -6,7 +6,20 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import os
 
+ROOT_FOLDER = os.getcwd()
+
+def load_disentanglement_data_dsprites():
+    dataset_zip = np.load(ROOT_FOLDER + "/datasets/dsprites.npz", encoding='bytes')
+    imgs = dataset_zip['imgs']
+    latents_values = dataset_zip['latents_values']
+    latents_classes = dataset_zip['latents_classes']
+    metadata = dataset_zip['metadata'][()]
+    latents_sizes = metadata[b'latents_sizes']  # for some reason, I was getting a key error here so hard coded in the next line.
+    latents_bases = np.concatenate((latents_sizes[::-1].cumprod()[::-1][1:],
+                                    np.array([1,])))
+    return imgs, latents_sizes, latent_bases
 
 def load_data(model, seed=None):
     # set seed
@@ -17,26 +30,26 @@ def load_data(model, seed=None):
     dataset = model.opts['dataset']
     if dataset == 'dsprites':
         try:
-            dsprites_zip = np.load('datasets/dsprites.npz', encoding='bytes')
+            dsprites_zip = np.load(ROOT_FOLDER + '/datasets/dsprites.npz', encoding='bytes')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://github.com/deepmind/dsprites-dataset/ Save dsprites_ndarray_....npz in datasets folder as dsprites.npz")
         data = dsprites_zip['imgs']
 
     elif dataset == 'celebA':
         try:
-            data = np.load('datasets/celebA.npy')
+            data = np.load(ROOT_FOLDER + 'datasets/celebA.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA.npy in datasets folder")
 
     elif dataset == 'celebA_mini':
         try:
-            data = np.load('datasets/celebA_mini.npy')
+            data = np.load(ROOT_FOLDER + 'datasets/celebA_mini.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA_mini.npy in datasets folder")
 
     elif dataset == 'fading_squares':
         try:
-            data = np.load('datasets/fading_squares.npy')
+            data = np.load(ROOT_FOLDER + 'datasets/fading_squares.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save fading_squares.npy in datasets folder")
     # last channel should be 1d if images are black/white
