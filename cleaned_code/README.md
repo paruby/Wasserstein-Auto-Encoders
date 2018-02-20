@@ -27,6 +27,6 @@ python -i load.py dsprites/exp10
 
 
 Todos:
-Save/load model
-Add mean/min/max log variance logging
-Write opts to file.
+- mean/min/max log variance logging
+- plotting functions on model object for ease of visualising loaded models
+- adding dcgan architecture to harmonise with ilya's code 
