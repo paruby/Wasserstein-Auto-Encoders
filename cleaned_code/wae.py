@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import disentanglement_metric
 
 class Model(object):
-    def __init__(self, opts):
+    def __init__(self, opts, load=False):
         self.sess = tf.Session()
 
         self.opts = opts
@@ -30,9 +30,12 @@ class Model(object):
         self.losses_test_fixed = []
 
         self.experiment_path = self.opts['experiment_path']
-        utils.create_directories(self)
-        utils.save_opts(self)
-        utils.copy_all_code(self)
+
+        if load is False:
+            utils.create_directories(self)
+            utils.save_opts(self)
+            utils.copy_all_code(self)
+
 
         models.encoder_init(self)
         models.decoder_init(self)
@@ -44,12 +47,14 @@ class Model(object):
         self.fixed_train_sample = self.sample_minibatch(test=False, seed=0)
         self.fixed_codes = self.sample_codes(seed=0)
 
-
         if self.opts['make_pictures_every'] is not None:
             utils.plot_all_init(self)
 
         self.saver = tf.train.Saver(keep_checkpoint_every_n_hours=2)
         self.sess.run(tf.global_variables_initializer())
+
+        if load is True:
+            self.load_saved_model()
 
     def save(self, it):
         model_path = "checkpoints/"
@@ -137,4 +142,6 @@ class Model(object):
             np.random.set_state(st0)
         return sample
 
-    
+    def load_saved_model(self):
+        os.chdir(model.experiment_path)
+        self.saver.restore(self.sess, "checkpoints/checkpoint")
