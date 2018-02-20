@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import zipfile
+import pickle
 
 ROOT_FOLDER = os.getcwd()
 
@@ -15,6 +16,10 @@ def save_opts(model):
     file_path = ROOT_FOLDER + "/" + model.opts['experiment_path'] + "/opts.txt"
     with open(file_path, "a") as opts_file:
         opts_file.write("{\n" + "\n".join("{}: {}".format(k, v) for k, v in model.opts.items()) + "\n}")
+    pickle_path = ROOT_FOLDER + "/" + model.opts['experiment_path'] + "/opts.pickle"
+    with open(pickle_path, "wb") as opts_file:
+        pickle.dump(model.opts, opts_file, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def copy_all_code(model):
     zip_path = ROOT_FOLDER + "/" + model.opts['experiment_path'] + "/code.zip"

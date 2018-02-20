@@ -136,3 +136,5 @@ class Model(object):
         if seed is not None:
             np.random.set_state(st0)
         return sample
+
+    
