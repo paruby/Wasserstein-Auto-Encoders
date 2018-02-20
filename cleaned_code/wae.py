@@ -100,7 +100,7 @@ class Model(object):
                         utils.plot_all(self, it)
 
                 if it % self.opts['save_every'] == 0:
-                    self.save(it)
+                    self.save(self.sess, 'model', global_step=it)
         # once training is complete, calculate disentanglement metric
         if 'disentanglement_metric' in self.opts:
             if self.opts['disentanglement_metric'] is True:
@@ -144,4 +144,4 @@ class Model(object):
 
     def load_saved_model(self):
         os.chdir(self.experiment_path)
-        self.saver.restore(self.sess, "checkpoints/checkpoint")
+        self.saver.restore(self.sess, tf.train.latest_checkpoint('checkpoints'))
