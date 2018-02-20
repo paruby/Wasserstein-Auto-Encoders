@@ -7,8 +7,23 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
+import zipfile
 
 ROOT_FOLDER = os.getcwd()
+
+def save_opts(model):
+    file_path = ROOT_FOLDER + "/" + model.opts['experiment_path'] + "/opts.txt"
+    with open(file_path, "a") as opts_file:
+        opts_file.write("{\n" + "\n".join("{}: {}".format(k, v) for k, v in model.opts.items()) + "\n}")
+
+def copy_all_code(model):
+    zip_path = ROOT_FOLDER + "/" + model.opts['experiment_path'] + "/code.zip"
+    zipf = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
+    files = [f for f in os.listdir('.') if os.path.isfile(f) and f[-3:] == '.py']
+    for f in files:
+        zipf.write(f)
+    zipf.close()
+
 
 def load_disentanglement_data_dsprites():
     dataset_zip = np.load(ROOT_FOLDER + "/datasets/dsprites.npz", encoding='bytes')

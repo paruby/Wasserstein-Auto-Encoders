@@ -1,5 +1,5 @@
 # Requirements
-Python 3.5+ 
+Python 3.5+
 
 # Structure of repository
 
@@ -11,3 +11,4 @@ Todos:
 
 Save/load model
 Add mean/min/max log variance logging
+Write opts to file.

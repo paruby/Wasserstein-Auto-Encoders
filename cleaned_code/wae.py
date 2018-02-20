@@ -17,6 +17,7 @@ class Model(object):
 
         self.opts = opts
         utils.opts_check(self)
+
         self.z_dim = self.opts['z_dim']
         self.batch_size = self.opts['batch_size']
         self.train_data, self.test_data = utils.load_data(self, seed=0)
@@ -30,7 +31,8 @@ class Model(object):
 
         self.experiment_path = self.opts['experiment_path']
         utils.create_directories(self)
-
+        utils.save_opts(self)
+        utils.copy_all_code(self)
 
         models.encoder_init(self)
         models.decoder_init(self)
