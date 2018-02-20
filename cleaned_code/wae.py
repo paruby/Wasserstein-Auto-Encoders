@@ -143,5 +143,5 @@ class Model(object):
         return sample
 
     def load_saved_model(self):
-        os.chdir(model.experiment_path)
+        os.chdir(self.experiment_path)
         self.saver.restore(self.sess, "checkpoints/checkpoint")

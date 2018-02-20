@@ -6,6 +6,6 @@ import pickle
 experiment_path = sys.argv[1]
 
 if __name__ == "__main__":
-    opts = pickle.load(experiment_path + "/opts.pickle")
-    model = wae.model(opts, load=True)
-    
+    with open(experiment_path + "/opts.pickle", 'rb') as f:
+        opts = pickle.load(f)
+    model = wae.Model(opts, load=True)
