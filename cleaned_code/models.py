@@ -45,7 +45,7 @@ def loss_init(model):
             beta = 1
         else:
             beta = model.opts['beta']
-        KL_divergence = 0.5 * tf.reduce_mean(tf.reduce_sum(tf.exp(model.z_logvar) - model.z_logvar + model.z_mean**2,axis=1) - model.data_dims)
+        KL_divergence = 0.5 * tf.reduce_mean(tf.reduce_sum(tf.exp(model.z_logvar) - model.z_logvar + model.z_mean**2,axis=1) - model.z_dim)
         model.loss_regulariser = tf.multiply(KL_divergence, beta, name="loss_regulariser")
 
     elif model.opts['loss_regulariser'] == 'WAE_MMD':

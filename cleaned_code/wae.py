@@ -9,6 +9,7 @@ import utils
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import disentanglement_metric
 
 class Model(object):
     def __init__(self, opts):
@@ -58,6 +59,7 @@ class Model(object):
         print("Model restored from : %s" % model_path)
 
     def train(self):
+        print("Beginning training")
         if self.opts['optimizer'] == 'adam':
             learning_rates = [i[0] for i in self.opts['learning_rate_schedule']]
             iterations_list = [i[1] for i in self.opts['learning_rate_schedule']]
@@ -67,6 +69,10 @@ class Model(object):
             lr = learning_rates[lr_counter]
             lr_iterations = iterations_list[lr_counter]
             while it < total_num_iterations:
+                if it % 1000 == 0:
+                    print("\nIteration %i" % it, flush=True)
+                if it % 100 == 0:
+                    print('.', end='', flush=True)
                 it += 1
                 if it > lr_iterations:
                     lr_counter += 1
@@ -88,7 +94,11 @@ class Model(object):
 
                 if it % self.opts['save_every'] == 0:
                     self.save(it)
-
+        # once training is complete, calculate disentanglement metric
+        if 'disentanglement_metric' in self.opts:
+            if self.opts['disentanglement_metric'] is True:
+                self.disentanglement = disentanglement_metric.Disentanglement(self)
+                self.disentanglement.do_all(it)
 
     def encode(self, images, mean=True):
         if mean is False:
@@ -124,6 +134,3 @@ class Model(object):
         if seed is not None:
             np.random.set_state(st0)
         return sample
-
-model = Model(config.opts)
-model.train()

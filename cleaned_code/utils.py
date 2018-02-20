@@ -19,7 +19,7 @@ def load_disentanglement_data_dsprites():
     latents_sizes = metadata[b'latents_sizes']  # for some reason, I was getting a key error here so hard coded in the next line.
     latents_bases = np.concatenate((latents_sizes[::-1].cumprod()[::-1][1:],
                                     np.array([1,])))
-    return imgs, latents_sizes, latent_bases
+    return imgs, latents_sizes, latents_bases
 
 def load_data(model, seed=None):
     # set seed
@@ -37,19 +37,19 @@ def load_data(model, seed=None):
 
     elif dataset == 'celebA':
         try:
-            data = np.load(ROOT_FOLDER + 'datasets/celebA.npy')
+            data = np.load(ROOT_FOLDER + '/datasets/celebA.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA.npy in datasets folder")
 
     elif dataset == 'celebA_mini':
         try:
-            data = np.load(ROOT_FOLDER + 'datasets/celebA_mini.npy')
+            data = np.load(ROOT_FOLDER + '/datasets/celebA_mini.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save celebA_mini.npy in datasets folder")
 
     elif dataset == 'fading_squares':
         try:
-            data = np.load(ROOT_FOLDER + 'datasets/fading_squares.npy')
+            data = np.load(ROOT_FOLDER + '/datasets/fading_squares.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save fading_squares.npy in datasets folder")
     # last channel should be 1d if images are black/white
@@ -533,6 +533,10 @@ def opts_check(model):
     opts = model.opts
     assert type(opts['save_every']) is int
     assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini']
+    if opts['dataset'] != 'dsprites':
+        assert 'disentanglement_metric' not in opts
+    if 'disentanglement_metric' in opts:
+        assert type(opts['disentanglement_metric']) is bool
     assert type(opts['experiment_path']) is str
     assert type(opts['z_dim']) is int
     assert opts['print_log_information'] in [True, False]
