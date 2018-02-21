@@ -108,6 +108,77 @@ def _mmd_init(model, C):
                    (batch_size_float * (batch_size_float - 1))
     return MMD_IMQ
 
+def _dcgan_encoder(model):
+    # adapted from Ilya's dcgan_encoder in https://github.com/tolstikhin/wae/blob/master/models.py
+    num_units = model.opts['encoder_num_filters']
+    num_layers = model.opts['encoder_num_layers']
+    layer_x = model.input
+    for i in xrange(num_layers):
+        scale = 2**(num_layers - i - 1)
+        layer_x = tf.layers.conv2d(layer_x,
+                                   filters=(num_units // scale),
+                                   strides=2,
+                                   padding='same')
+        layer_x = tf.layers.batch_normalization(layer_x)
+        layer_x = tf.nn.relu(layer_x)
+
+    if model.opts['z_mean_activation'] == 'tanh':
+        model.z_mean = tf.layers.dense(inputs=layer_x,
+                                       units=model.z_dim,
+                                       activation=tf.nn.tanh,
+                                       name="z_mean")
+    elif model.opts['z_mean_activation'] is None:
+        model.z_mean = tf.layers.dense(inputs=layer_x,
+                                       units=model.z_dim,
+                                       name="z_mean")
+
+    if model.opts['encoder_distribution'] != 'deterministic':
+        model.z_logvar = tf.layers.dense(inputs=layer_x,
+                                         units=model.z_dim,
+                                         name="z_logvar")
+
+
+def _dcgan_decoder(model):
+    # adapted from Ilya's _dcgan_decoder in https://github.com/tolstikhin/wae/blob/master/models.py
+    output_shape = model.data_dims
+    num_units = model.opts['decoder_num_filters']
+    batch_size = model.batch_size
+    num_layers = model.opts['decoder_num_layers']
+    if opts['decoder_architecture'] == 'dcgan':
+        height = output_shape[0] / 2**num_layers
+        width = output_shape[1] / 2**num_layers
+    elif opts['decoder_architecture'] == 'dcgan_mod':
+        height = output_shape[0] / 2**(num_layers - 1)
+        width = output_shape[1] / 2**(num_layers - 1)
+
+    h0 = ops.linear(
+        opts, noise, num_units * height * width, scope='h0_lin')
+    h0 = tf.reshape(h0, [-1, height, width, num_units])
+    h0 = tf.nn.relu(h0)
+    layer_x = h0
+    for i in xrange(num_layers - 1):
+        scale = 2**(i + 1)
+        _out_shape = [batch_size, height * scale,
+                      width * scale, num_units / scale]
+        layer_x = ops.deconv2d(opts, layer_x, _out_shape,
+                               scope='h%d_deconv' % i)
+        if opts['batch_norm']:
+            layer_x = ops.batch_norm(opts, layer_x,
+                                     is_training, reuse, scope='h%d_bn' % i)
+        layer_x = tf.nn.relu(layer_x)
+    _out_shape = [batch_size] + list(output_shape)
+    if opts['g_arch'] == 'dcgan':
+        last_h = ops.deconv2d(
+            opts, layer_x, _out_shape, scope='hfinal_deconv')
+    elif opts['g_arch'] == 'dcgan_mod':
+        last_h = ops.deconv2d(
+            opts, layer_x, _out_shape, d_h=1, d_w=1, scope='hfinal_deconv')
+    if opts['input_normalize_sym']:
+        return tf.nn.tanh(last_h), last_h
+    else:
+        return tf.nn.sigmoid(last_h), last_h
+
+
 def _encoder_small_convolutional_celebA_init(model):
     '''
     returns [z_mean, z_logvar]

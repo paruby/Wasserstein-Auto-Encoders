@@ -3,6 +3,8 @@ import argparse
 import config
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--experiment",
+                    help='Default experiment configs to use: dsprites/fading_squares/celebA_mini/celebA_random/celebA_deterministic')
 parser.add_argument("--dataset",
                     help='Dataset to train on: dsprites/celebA/celebA_mini/fading_squares')
 parser.add_argument("--z_dim", help='latent space dimensionality', type=int)
@@ -41,17 +43,21 @@ parser.add_argument("--plot_losses",
 FLAGS = parser.parse_args()
 
 if __name__ == "__main__":
-    if FLAGS.dataset == 'dsprites':
+    if FLAGS.experiment == 'dsprites':
         opts = config.dsprites_opts
-    elif FLAGS.dataset == 'fading_squares':
+    elif FLAGS.experiment == 'fading_squares':
         opts = config.fading_squares_opts
-    elif FLAGS.dataset == 'celebA':
-        opts = config.celebA_opts
-    elif FLAGS.dataset == 'celebA_mini':
+    elif FLAGS.experiment == 'celebA_random':
+        opts = config.celebA_random_opts
+    elif FLAGS.experiment == 'celebA_deterministic':
+        opts = config.celebA_deterministic_opts
+    elif FLAGS.experiment == 'celebA_mini':
         opts = config.celebA_mini_opts
     else:
         assert False, "Invalid dataset"
 
+    if FLAGS.dataset:
+        opts['dataset'] = FLAGS.dataset
     if FLAGS.z_dim:
         opts['z_dim'] = FLAGS.z_dim
     if FLAGS.lambda_imq:
