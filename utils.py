@@ -558,7 +558,7 @@ def lerp(v1, v2, steps):
 def opts_check(model):
     opts = model.opts
     assert type(opts['save_every']) is int
-    assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini']
+    assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini', 'grassli']
     if opts['dataset'] != 'dsprites':
         assert 'disentanglement_metric' not in opts
     if 'disentanglement_metric' in opts:
