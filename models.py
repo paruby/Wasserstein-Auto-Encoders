@@ -7,6 +7,8 @@ def encoder_init(model):
         _encoder_small_convolutional_celebA_init(model)
     elif model.opts['encoder_architecture'] == 'FC_dsprites':
         _encoder_FC_dsprites_init(model)
+    elif model.opts['encoder_architecture'] == 'dcgan':
+        _dcgan_encoder(model)
     _z_sample_init(model)
 
 
@@ -24,6 +26,8 @@ def decoder_init(model):
         _decoder_small_convolutional_celebA_init(model)
     elif model.opts['decoder_architecture'] == 'FC_dsprites':
         _decoder_FC_dsprites_init(model)
+    elif model.opts['decoder_architecture'] in ['dcgan', 'dcgan_mod']:
+        _dcgan_decoder(model)
 
 def loss_init(model):
     all_losses = []
