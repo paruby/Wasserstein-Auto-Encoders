@@ -178,7 +178,7 @@ def _dcgan_decoder(model):
         layer_x = tf.layers.batch_normalization(layer_x)
         layer_x = tf.nn.relu(layer_x)
     _out_shape = [batch_size] + list(output_shape)
-    if model.opts['g_arch'] == 'dcgan':
+    if model.opts['decoder_architecture'] == 'dcgan':
         model.x_logits_img_shape = tf.layers.conv2d_transpose(inputs=layer_x,
                                                               filters=_out_shape[-1],
                                                               kernel_size=conv_filter_dim,
@@ -188,7 +188,7 @@ def _dcgan_decoder(model):
         model.x_logits = tf.reshape(model.x_logits_img_shape,
                                     shape=[-1, np.prod(model.data_dims)],
                                     name="x_logits")
-    elif model.opts['g_arch'] == 'dcgan_mod':
+    elif model.opts['decoder_architecture'] == 'dcgan_mod':
         model.x_logits_img_shape = tf.layers.conv2d_transpose(inputs=layer_x,
                                                               filters=_out_shape[-1],
                                                               kernel_size=conv_filter_dim,
