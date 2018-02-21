@@ -130,8 +130,8 @@ def _dcgan_encoder(model):
         layer_x = tf.layers.batch_normalization(layer_x)
         layer_x = tf.nn.relu(layer_x)
 
-    dims = tf.shape(layer_x)
-    layer_x = tf.reshape(layer_x, shape=[-1,tf.reduce_prod(dims[1:])])
+    dim = (model.data_dims[0] // (2 ** num_layers)) * (model.data_dims[1] // (2 ** num_layers)) * num_units
+    layer_x = tf.reshape(layer_x, shape=[-1, dim])
     if model.opts['z_mean_activation'] == 'tanh':
         model.z_mean = tf.layers.dense(inputs=layer_x,
                                        units=model.z_dim,
