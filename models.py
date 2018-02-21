@@ -112,12 +112,14 @@ def _dcgan_encoder(model):
     # adapted from Ilya's dcgan_encoder in https://github.com/tolstikhin/wae/blob/master/models.py
     num_units = model.opts['encoder_num_filters']
     num_layers = model.opts['encoder_num_layers']
+    conv_filter_dim = model.opts['conv_filter_dim']
     layer_x = model.input
     for i in range(num_layers):
         scale = 2**(num_layers - i - 1)
         layer_x = tf.layers.conv2d(layer_x,
                                    filters=(num_units // scale),
                                    strides=2,
+                                   kernel_size=[conv_filter_dim, conv_filter_dim],
                                    padding='same')
         layer_x = tf.layers.batch_normalization(layer_x)
         layer_x = tf.nn.relu(layer_x)
@@ -144,6 +146,7 @@ def _dcgan_decoder(model):
     num_units = model.opts['decoder_num_filters']
     batch_size = model.batch_size
     num_layers = model.opts['decoder_num_layers']
+    conv_filter_dim = model.opts['conv_filter_dim']
     if opts['decoder_architecture'] == 'dcgan':
         height = output_shape[0] // 2**num_layers
         width = output_shape[1] // 2**num_layers
@@ -160,23 +163,37 @@ def _dcgan_decoder(model):
         scale = 2**(i + 1)
         _out_shape = [batch_size, height * scale,
                       width * scale, num_units // scale]
-        layer_x = ops.deconv2d(opts, layer_x, _out_shape,
-                               scope='h%d_deconv' % i)
-        if opts['batch_norm']:
-            layer_x = ops.batch_norm(opts, layer_x,
-                                     is_training, reuse, scope='h%d_bn' % i)
+        _in_shape = layer_x.get_shape().as_list()
+        assert len(_in_shape) == 4, 'Conv2d_transpose works only with 4d tensors.'
+
+        layer_x = tf.layers.conv2d_transpose(inputs=layer_x,
+                                             filters=_out_shape[-1],
+                                             kernel_size=conv_filter_dim,
+                                             strides=2,
+                                             padding='same')
+        layer_x = tf.layers.batch_normalization(layer_x)
         layer_x = tf.nn.relu(layer_x)
     _out_shape = [batch_size] + list(output_shape)
     if opts['g_arch'] == 'dcgan':
-        last_h = ops.deconv2d(
-            opts, layer_x, _out_shape, scope='hfinal_deconv')
+        model.x_logits_img_shape = tf.layers.conv2d_transpose(inputs=layer_x,
+                                                              filters=_out_shape[-1],
+                                                              kernel_size=conv_filter_dim,
+                                                              strides=2,
+                                                              padding='same',
+                                                              name='x_logits')
+        model.x_logits = tf.reshape(model.x_logits_img_shape,
+                                    shape=[-1, np.prod(model.data_dims)],
+                                    name="x_logits")
     elif opts['g_arch'] == 'dcgan_mod':
-        last_h = ops.deconv2d(
-            opts, layer_x, _out_shape, d_h=1, d_w=1, scope='hfinal_deconv')
-    if opts['input_normalize_sym']:
-        return tf.nn.tanh(last_h), last_h
-    else:
-        return tf.nn.sigmoid(last_h), last_h
+        model.x_logits_img_shape = tf.layers.conv2d_transpose(inputs=layer_x,
+                                                              filters=_out_shape[-1],
+                                                              kernel_size=conv_filter_dim,
+                                                              strides=1,
+                                                              padding='same',
+                                                              name='x_logits')
+        model.x_logits = tf.reshape(model.x_logits_img_shape,
+                                    shape=[-1, np.prod(model.data_dims)],
+                                    name="x_logits")
 
 
 def _encoder_small_convolutional_celebA_init(model):

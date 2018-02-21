@@ -572,10 +572,12 @@ def opts_check(model):
     if opts["encoder_architecture"] == 'dcgan':
         assert type(model.opts['encoder_num_filters']) is int
         assert type(model.opts['encoder_num_layers']) is int
+        assert type(model.opts['conv_filter_dim']) is int
     assert opts["decoder_architecture"] in ['small_convolutional_celebA', 'FC_dsprites', 'dcgan', 'dcgan_mod']
     if opts["decoder_architecture"] in ['dcgan', 'dcgan_mod'] :
         assert type(model.opts['decoder_num_filters']) is int
         assert type(model.opts['decoder_num_layers']) is int
+        assert type(model.opts['conv_filter_dim']) is int
     assert opts['z_mean_activation'] in ['tanh', None]
     assert opts['encoder_distribution'] in ['deterministic', 'gaussian', 'uniform']
     assert opts['logvar-clipping'] is None or (len(opts['logvar-clipping']) == 2 and all([type(i) is int for i in opts['logvar-clipping']]))
