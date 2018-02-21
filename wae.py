@@ -57,7 +57,7 @@ class Model(object):
             self.load_saved_model()
 
     def save(self, it):
-        model_path = "checkpoints/"
+        model_path = "checkpoints/model"
         save_path = self.saver.save(self.sess, model_path, global_step=it)
         print("Model saved to: %s" % save_path)
 
@@ -100,7 +100,7 @@ class Model(object):
                         utils.plot_all(self, it)
 
                 if it % self.opts['save_every'] == 0:
-                    self.save(self.sess, 'model', global_step=it)
+                    self.save(self.sess, it)
         # once training is complete, calculate disentanglement metric
         if 'disentanglement_metric' in self.opts:
             if self.opts['disentanglement_metric'] is True:

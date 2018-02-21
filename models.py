@@ -113,7 +113,7 @@ def _dcgan_encoder(model):
     num_units = model.opts['encoder_num_filters']
     num_layers = model.opts['encoder_num_layers']
     layer_x = model.input
-    for i in xrange(num_layers):
+    for i in range(num_layers):
         scale = 2**(num_layers - i - 1)
         layer_x = tf.layers.conv2d(layer_x,
                                    filters=(num_units // scale),
@@ -145,21 +145,21 @@ def _dcgan_decoder(model):
     batch_size = model.batch_size
     num_layers = model.opts['decoder_num_layers']
     if opts['decoder_architecture'] == 'dcgan':
-        height = output_shape[0] / 2**num_layers
-        width = output_shape[1] / 2**num_layers
+        height = output_shape[0] // 2**num_layers
+        width = output_shape[1] // 2**num_layers
     elif opts['decoder_architecture'] == 'dcgan_mod':
-        height = output_shape[0] / 2**(num_layers - 1)
-        width = output_shape[1] / 2**(num_layers - 1)
+        height = output_shape[0] // 2**(num_layers - 1)
+        width = output_shape[1] // 2**(num_layers - 1)
 
-    h0 = ops.linear(
-        opts, noise, num_units * height * width, scope='h0_lin')
+    h0 = tf.layers.dense(inputs=model.z_sample,
+                         units=num_units * height * width)
     h0 = tf.reshape(h0, [-1, height, width, num_units])
     h0 = tf.nn.relu(h0)
     layer_x = h0
-    for i in xrange(num_layers - 1):
+    for i in range(num_layers - 1):
         scale = 2**(i + 1)
         _out_shape = [batch_size, height * scale,
-                      width * scale, num_units / scale]
+                      width * scale, num_units // scale]
         layer_x = ops.deconv2d(opts, layer_x, _out_shape,
                                scope='h%d_deconv' % i)
         if opts['batch_norm']:
