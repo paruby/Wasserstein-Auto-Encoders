@@ -35,7 +35,7 @@ parser.add_argument("--z_logvar_regularisation",
                     help="Regularisation on log-variances: None/L1/L2_squared")
 parser.add_argument("--lambda_logvar_regularisation", type=float,
                     help="Coefficient of logvariance regularisation")
-parser.add_argument("--plot_losses", type=bool,
+parser.add_argument("--plot_losses",
                     help="Plot losses and least-gaussian-subspace: True/False:")
 
 FLAGS = parser.parse_args()
@@ -88,7 +88,10 @@ if __name__ == "__main__":
     if FLAGS.beta:
         opts['beta'] = FLAGS.beta
     if FLAGS.plot_losses:
-        opts['plot_losses'] = FLAGS.plot_losses    
+        if FLAGS.plot_losses == "True":
+            opts['plot_losses'] = True
+        elif FLAGS.plot_losses == "False":
+            opts['plot_losses'] = False
 
 
     model = wae.Model(opts)
