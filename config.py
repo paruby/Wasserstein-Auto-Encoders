@@ -1,6 +1,6 @@
 fading_squares_opts = {}
 fading_squares_opts['dataset'] = 'fading_squares'
-fading_squares_opts['experiment_path'] = 'fading_squares/exp1'
+fading_squares_opts['experiment_path'] = 'experiments/fading_squares/exp1'
 fading_squares_opts['z_dim'] = 2
 fading_squares_opts['print_log_information'] = True
 fading_squares_opts['make_pictures_every'] = 10000
@@ -29,7 +29,7 @@ fading_squares_opts['learning_rate_schedule'] = [(1e-3, 10000), (7e-4, 20000), (
 
 dsprites_opts = {}
 dsprites_opts['dataset'] = 'dsprites'
-dsprites_opts['experiment_path'] = 'dsprites/exp1'
+dsprites_opts['experiment_path'] = 'experiments/dsprites/exp1'
 dsprites_opts['z_dim'] = 16
 dsprites_opts['print_log_information'] = True
 dsprites_opts['make_pictures_every'] = 10000
@@ -59,7 +59,7 @@ dsprites_opts['disentanglement_metric'] = True
 
 celebA_mini_opts = {}
 celebA_mini_opts['dataset'] = 'celebA_mini'
-celebA_mini_opts['experiment_path'] = 'celebA_mini/exp1'
+celebA_mini_opts['experiment_path'] = 'experiments/celebA_mini/exp1'
 celebA_mini_opts['z_dim'] = 256
 celebA_mini_opts['print_log_information'] = True
 celebA_mini_opts['make_pictures_every'] = 10000
@@ -88,7 +88,7 @@ celebA_mini_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
 
 celebA_opts = {}
 celebA_opts['dataset'] = 'celebA'
-celebA_opts['experiment_path'] = 'celebA/exp1'
+celebA_opts['experiment_path'] = 'experiments/celebA/exp1'
 celebA_opts['z_dim'] = 256
 celebA_opts['print_log_information'] = True
 celebA_opts['make_pictures_every'] = 10000
