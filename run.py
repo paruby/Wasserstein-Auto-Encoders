@@ -53,8 +53,10 @@ if __name__ == "__main__":
         opts = config.celebA_deterministic_opts
     elif FLAGS.experiment == 'celebA_mini':
         opts = config.celebA_mini_opts
+    elif FLAGS.experiment == 'celebA_dcgan_deterministic':
+        opts = config.celebA_dcgan_deterministic_opts
     else:
-        assert False, "Invalid dataset"
+        assert False, "Invalid experiment defaults"
 
     if FLAGS.dataset:
         opts['dataset'] = FLAGS.dataset
