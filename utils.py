@@ -76,6 +76,7 @@ def load_data(model, seed=None):
     elif dataset == 'grassli':
         try:
             data = np.load(ROOT_FOLDER + '/datasets/grassli.npy')
+            data = data / 255 # pixels should be in [0,1], not [0,255]
         except FileNotFoundError:
             print("Dataset file does not exist. You can get this from Ilya!")
     # last channel should be 1d if images are black/white
