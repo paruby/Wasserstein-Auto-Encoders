@@ -113,6 +113,8 @@ def _mmd_init(model, C):
     return MMD_IMQ
 
 def _dcgan_encoder(model):
+    x = model.input
+    model.x_flattened = tf.reshape(x, shape=[-1, np.prod(model.data_dims)])
     # adapted from Ilya's dcgan_encoder in https://github.com/tolstikhin/wae/blob/master/models.py
     num_units = model.opts['encoder_num_filters']
     num_layers = model.opts['encoder_num_layers']
