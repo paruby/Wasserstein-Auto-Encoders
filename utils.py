@@ -72,6 +72,12 @@ def load_data(model, seed=None):
             data = np.load(ROOT_FOLDER + '/datasets/fading_squares.npy')
         except FileNotFoundError:
             print("Dataset file does not exist. You can download it here: https://www.dropbox.com/sh/flu98x7xghw2i59/AAC-eDY7TS9V54AxCtvBjGTAa?dl=0 Save fading_squares.npy in datasets folder")
+
+    elif dataset == 'grassli':
+        try:
+            data = np.load(ROOT_FOLDER + '/datasets/grassli.npy')
+        except FileNotFoundError:
+            print("Dataset file does not exist. You can get this from Ilya!")
     # last channel should be 1d if images are black/white
     if len(data.shape) == 3:
         data = data[:, :, :, None]

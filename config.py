@@ -177,3 +177,68 @@ celebA_dcgan_deterministic_opts['IMQ_length_params'] = [c*celebA_dcgan_determini
 celebA_dcgan_deterministic_opts['z_logvar_regularisation'] = None
 celebA_dcgan_deterministic_opts['optimizer'] = 'adam'
 celebA_dcgan_deterministic_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+
+
+
+grassli_WAE_opts = {}
+grassli_WAE_opts['dataset'] = 'grassli'
+grassli_WAE_opts['experiment_path'] = 'experiments/grassli/WAE/exp1'
+grassli_WAE_opts['z_dim'] = 64
+grassli_WAE_opts['print_log_information'] = True
+grassli_WAE_opts['make_pictures_every'] = 10000
+grassli_WAE_opts['save_every'] = 10000
+grassli_WAE_opts['plot_axis_walks'] = False
+#grassli_WAE_opts['axis_walk_range'] = 1
+grassli_WAE_opts['plot_losses'] =  True
+grassli_WAE_opts['print_log_information'] = True
+grassli_WAE_opts['batch_size'] = 100
+grassli_WAE_opts["encoder_architecture"] = 'dcgan'
+grassli_WAE_opts["decoder_architecture"] = 'dcgan'
+
+grassli_WAE_opts['encoder_num_filters'] = 1024
+grassli_WAE_opts['encoder_num_layers'] = 4
+grassli_WAE_opts['decoder_num_filters'] = 1024
+grassli_WAE_opts['decoder_num_layers'] = 4
+grassli_WAE_opts['conv_filter_dim'] = 4
+
+grassli_WAE_opts['z_mean_activation'] = None
+grassli_WAE_opts['encoder_distribution'] = 'deterministic'
+grassli_WAE_opts['logvar-clipping'] = None
+grassli_WAE_opts['z_prior'] = 'gaussian'
+grassli_WAE_opts['loss_reconstruction'] = 'L2_squared'
+grassli_WAE_opts['loss_regulariser'] = 'WAE_MMD'
+grassli_WAE_opts['lambda_imq'] = 400.0
+coeffs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0]
+grassli_WAE_opts['IMQ_length_params'] = [c*grassli_WAE_opts['z_dim'] for c in coeffs]
+grassli_WAE_opts['z_logvar_regularisation'] = None
+grassli_WAE_opts['optimizer'] = 'adam'
+grassli_WAE_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+
+
+grassli_VAE_opts = {}
+grassli_VAE_opts['dataset'] = 'grassli'
+grassli_VAE_opts['experiment_path'] = 'experiments/grassli/VAE/exp1'
+grassli_VAE_opts['z_dim'] = 64
+grassli_VAE_opts['print_log_information'] = True
+grassli_VAE_opts['make_pictures_every'] = 10000
+grassli_VAE_opts['save_every'] = 10000
+grassli_VAE_opts['plot_axis_walks'] = False
+grassli_VAE_opts['plot_losses'] =  True
+grassli_VAE_opts['print_log_information'] = True
+grassli_VAE_opts['batch_size'] = 100
+grassli_VAE_opts["encoder_architecture"] = 'dcgan'
+grassli_VAE_opts["decoder_architecture"] = 'dcgan'
+grassli_VAE_opts['encoder_num_filters'] = 1024
+grassli_VAE_opts['encoder_num_layers'] = 4
+grassli_VAE_opts['decoder_num_filters'] = 1024
+grassli_VAE_opts['decoder_num_layers'] = 4
+grassli_VAE_opts['conv_filter_dim'] = 4
+grassli_VAE_opts['z_mean_activation'] = None
+grassli_VAE_opts['encoder_distribution'] = 'gaussian'
+grassli_VAE_opts['logvar-clipping'] = None
+grassli_VAE_opts['z_prior'] = 'gaussian'
+grassli_VAE_opts['loss_reconstruction'] = 'L2_squared'
+grassli_VAE_opts['loss_regulariser'] = 'VAE'
+grassli_VAE_opts['z_logvar_regularisation'] = None
+grassli_VAE_opts['optimizer'] = 'adam'
+grassli_VAE_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]

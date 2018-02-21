@@ -55,6 +55,10 @@ if __name__ == "__main__":
         opts = config.celebA_mini_opts
     elif FLAGS.experiment == 'celebA_dcgan_deterministic':
         opts = config.celebA_dcgan_deterministic_opts
+    elif FLAGS.experiment == 'grassli_VAE':
+        opts = config.grassli_VAE_opts
+    elif FLAGS.experiment == 'grassli_WAE':
+        opts = config.grassli_WAE_opts
     else:
         assert False, "Invalid experiment defaults"
 
