@@ -40,7 +40,7 @@ parser.add_argument("--lambda_logvar_regularisation", type=float,
 parser.add_argument("--plot_losses",
                     help="Plot losses and least-gaussian-subspace: True/False:")
 parser.add_argument("--adversarial_cost_n_filters", type=int,
-                    help="Number of convolutional filters to use for adversarial cost") 4
+                    help="Number of convolutional filters to use for adversarial cost")
 
 FLAGS = parser.parse_args()
 
