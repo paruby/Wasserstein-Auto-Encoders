@@ -3,13 +3,14 @@ import numpy as np
 
 
 def encoder_init(model):
-    if model.opts['encoder_architecture'] == 'small_convolutional_celebA':
-        _encoder_small_convolutional_celebA_init(model)
-    elif model.opts['encoder_architecture'] == 'FC_dsprites':
-        _encoder_FC_dsprites_init(model)
-    elif model.opts['encoder_architecture'] == 'dcgan':
-        _dcgan_encoder(model)
-    _z_sample_init(model)
+    with tf.variable_scope('encoder'):
+        if model.opts['encoder_architecture'] == 'small_convolutional_celebA':
+            _encoder_small_convolutional_celebA_init(model)
+        elif model.opts['encoder_architecture'] == 'FC_dsprites':
+            _encoder_FC_dsprites_init(model)
+        elif model.opts['encoder_architecture'] == 'dcgan':
+            _dcgan_encoder(model)
+        _z_sample_init(model)
 
 
 def prior_init(model):
@@ -22,12 +23,13 @@ def prior_init(model):
                                             name="z_prior_sample")
 
 def decoder_init(model):
-    if model.opts['decoder_architecture'] == 'small_convolutional_celebA':
-        _decoder_small_convolutional_celebA_init(model)
-    elif model.opts['decoder_architecture'] == 'FC_dsprites':
-        _decoder_FC_dsprites_init(model)
-    elif model.opts['decoder_architecture'] in ['dcgan', 'dcgan_mod']:
-        _dcgan_decoder(model)
+    with tf.variable_scope('decoder'):
+        if model.opts['decoder_architecture'] == 'small_convolutional_celebA':
+            _decoder_small_convolutional_celebA_init(model)
+        elif model.opts['decoder_architecture'] == 'FC_dsprites':
+            _decoder_FC_dsprites_init(model)
+        elif model.opts['decoder_architecture'] in ['dcgan', 'dcgan_mod']:
+            _dcgan_decoder(model)
 
 def loss_init(model):
     all_losses = []
@@ -41,6 +43,27 @@ def loss_init(model):
         model.loss_reconstruction = tf.reduce_mean(tf.reduce_sum(
             tf.square(tf.nn.sigmoid(model.x_logits) - model.x_flattened), axis=1),
             name="loss_reconstruction")
+
+    elif model.opts['loss_reconstruction'] == 'L2_squared+adversarial':
+        with tf.variable_scope('adversarial_cost'):
+            out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+            n_filters = model.opts['adversarial_cost_n_filters']
+            kernel_size = model.opts['adversarial_cost_kernel_size']
+            fake_img_repr  = tf.layers.conv2d(out_im,
+                                              filters=n_filters,
+                                              strides=1,
+                                              kernel_size=[kernel_size,kernel_size],
+                                              name='adv_cost_repr')
+            real_img_repr  = tf.layers.conv2d(model.input,
+                                              filters=n_filters,
+                                              strides=1,
+                                              kernel_size=[kernel_size,kernel_size],
+                                              name='adv_cost_repr',
+                                              reuse=True)
+            sq_diff = (real_img_repr - fake_img_repr)**2
+            model.adv_cost_loss = tf.reduce_sum(tf.reduce_mean(sq_diff, axis=0), name='adv_cost_loss')
+            l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
+            model.loss_reconstruction = tf.add(model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
@@ -72,11 +95,15 @@ def loss_init(model):
     model.loss_total = tf.add_n(all_losses)
 
 def optimizer_init(model):
+    encoder_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='encoder')
+    decoder_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='decoder')
     if model.opts['optimizer'] == 'adam':
         model.learning_rate = tf.placeholder(tf.float32)
-        model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.loss_total)
+        model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.loss_total, var_list=encoder_vars+decoder_vars)
 
-
+        if model.opts['loss_reconstruction'] == 'L2_squared+adversarial':
+            adv_cost_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='adversarial_cost')
+            model.adv_cost_train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(-model.adv_cost_loss, var_list=adv_cost_vars)
 
 def _mmd_init(model, C):
     batch_size = tf.shape(model.input)[0]

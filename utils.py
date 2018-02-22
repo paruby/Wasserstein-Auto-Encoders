@@ -589,7 +589,13 @@ def opts_check(model):
     assert opts['encoder_distribution'] in ['deterministic', 'gaussian', 'uniform']
     assert opts['logvar-clipping'] is None or (len(opts['logvar-clipping']) == 2 and all([type(i) is int for i in opts['logvar-clipping']]))
     assert opts['z_prior'] in ['gaussian', 'uniform']
-    assert opts['loss_reconstruction'] in ['bernoulli', 'L2_squared']
+    assert opts['loss_reconstruction'] in ['bernoulli', 'L2_squared', 'L2_squared+adversarial']
+    if opts['loss_reconstruction'] == 'L2_squared+adversarial':
+        assert type(opts['adversarial_cost_n_filters']) is int
+        assert type(opts['adversarial_cost_kernel_size']) is int
+                assert type(opts['adv_cost_learning_rate_schedule']) is list
+                assert all([type(l) is tuple and len(l)==2 for l in opts['adv_cost_learning_rate_schedule']])
+                assert all([opts['adv_cost_learning_rate_schedule'][i][1] < opts['adv_cost_learning_rate_schedule'][i+1][1] for i in range(len(opts['adv_cost_learning_rate_schedule'])-1)])
     assert opts['loss_regulariser'] in ['VAE', 'beta_VAE', 'WAE_MMD'] # either KL divergence of VAE or divergence of WAE
     if opts['loss_regulariser'] == 'beta_VAE':
         assert type(opts['beta']) is float

@@ -91,6 +91,12 @@ class Model(object):
                     feed_dict={self.learning_rate: lr,
                                self.input: self.sample_minibatch(self.batch_size)}
                     )
+                if self.opts['loss_reconstruction'] == 'L2_squared+adversarial':
+                    self.sess.run(
+                        self.adv_cost_train_step,
+                        feed_dict={self.learning_rate: lr,
+                                   self.input: self.sample_minibatch(self.batch_size)}
+                        )
 
                 if (self.opts['print_log_information'] is True) and (it % 100 == 0):
                     utils.print_log_information(self, it)

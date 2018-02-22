@@ -242,3 +242,41 @@ grassli_VAE_opts['loss_regulariser'] = 'VAE'
 grassli_VAE_opts['z_logvar_regularisation'] = None
 grassli_VAE_opts['optimizer'] = 'adam'
 grassli_VAE_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+
+
+celebA_dcgan_adv_cost_opts = {}
+celebA_dcgan_adv_cost_opts['dataset'] = 'celebA'
+celebA_dcgan_adv_cost_opts['experiment_path'] = 'experiments/celebA/dcgan/adv_cost/exp1'
+celebA_dcgan_adv_cost_opts['z_dim'] = 64
+celebA_dcgan_adv_cost_opts['print_log_information'] = True
+celebA_dcgan_adv_cost_opts['make_pictures_every'] = 10000
+celebA_dcgan_adv_cost_opts['save_every'] = 10000
+celebA_dcgan_adv_cost_opts['plot_axis_walks'] = False
+#celebA_dcgan_adv_cost_opts['axis_walk_range'] = 1
+celebA_dcgan_adv_cost_opts['plot_losses'] =  True
+celebA_dcgan_adv_cost_opts['print_log_information'] = True
+celebA_dcgan_adv_cost_opts['batch_size'] = 100
+celebA_dcgan_adv_cost_opts["encoder_architecture"] = 'dcgan'
+celebA_dcgan_adv_cost_opts["decoder_architecture"] = 'dcgan'
+
+celebA_dcgan_adv_cost_opts['encoder_num_filters'] = 256
+celebA_dcgan_adv_cost_opts['encoder_num_layers'] = 3
+celebA_dcgan_adv_cost_opts['decoder_num_filters'] = 256
+celebA_dcgan_adv_cost_opts['decoder_num_layers'] = 3
+celebA_dcgan_adv_cost_opts['conv_filter_dim'] = 3
+
+celebA_dcgan_adv_cost_opts['z_mean_activation'] = None
+celebA_dcgan_adv_cost_opts['encoder_distribution'] = 'deterministic'
+celebA_dcgan_adv_cost_opts['logvar-clipping'] = None
+celebA_dcgan_adv_cost_opts['z_prior'] = 'gaussian'
+celebA_dcgan_adv_cost_opts['loss_reconstruction'] = 'L2_squared+adversarial'
+celebA_dcgan_adv_cost_opts['adversarial_cost_n_filters'] = 4
+celebA_dcgan_adv_cost_opts['adversarial_cost_kernel_size'] = 3
+celebA_dcgan_adv_cost_opts['loss_regulariser'] = 'WAE_MMD'
+celebA_dcgan_adv_cost_opts['lambda_imq'] = 400.0
+coeffs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0]
+celebA_dcgan_adv_cost_opts['IMQ_length_params'] = [c*celebA_dcgan_adv_cost_opts['z_dim'] for c in coeffs]
+celebA_dcgan_adv_cost_opts['z_logvar_regularisation'] = None
+celebA_dcgan_adv_cost_opts['optimizer'] = 'adam'
+celebA_dcgan_adv_cost_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+celebA_dcgan_adv_cost_opts['adv_cost_learning_rate_schedule'] = [(1e-5, 40000), (1e-6, 80001)]
