@@ -259,11 +259,11 @@ celebA_dcgan_adv_cost_opts['batch_size'] = 100
 celebA_dcgan_adv_cost_opts["encoder_architecture"] = 'dcgan'
 celebA_dcgan_adv_cost_opts["decoder_architecture"] = 'dcgan'
 
-celebA_dcgan_adv_cost_opts['encoder_num_filters'] = 256
-celebA_dcgan_adv_cost_opts['encoder_num_layers'] = 3
-celebA_dcgan_adv_cost_opts['decoder_num_filters'] = 256
-celebA_dcgan_adv_cost_opts['decoder_num_layers'] = 3
-celebA_dcgan_adv_cost_opts['conv_filter_dim'] = 3
+celebA_dcgan_adv_cost_opts['encoder_num_filters'] = 1024
+celebA_dcgan_adv_cost_opts['encoder_num_layers'] = 4
+celebA_dcgan_adv_cost_opts['decoder_num_filters'] = 1024
+celebA_dcgan_adv_cost_opts['decoder_num_layers'] = 4
+celebA_dcgan_adv_cost_opts['conv_filter_dim'] = 4
 
 celebA_dcgan_adv_cost_opts['z_mean_activation'] = None
 celebA_dcgan_adv_cost_opts['encoder_distribution'] = 'deterministic'
