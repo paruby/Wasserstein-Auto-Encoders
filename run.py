@@ -39,6 +39,8 @@ parser.add_argument("--lambda_logvar_regularisation", type=float,
                     help="Coefficient of logvariance regularisation")
 parser.add_argument("--plot_losses",
                     help="Plot losses and least-gaussian-subspace: True/False:")
+parser.add_argument("--adversarial_cost_n_filters", type=int,
+                    help="Number of convolutional filters to use for adversarial cost") 4
 
 FLAGS = parser.parse_args()
 
@@ -106,6 +108,8 @@ if __name__ == "__main__":
             opts['plot_losses'] = True
         elif FLAGS.plot_losses == "False":
             opts['plot_losses'] = False
+    if FLAGS.adversarial_cost_n_filters:
+        opts['adversarial_cost_n_filters'] = FLAGS.adversarial_cost_n_filters
 
 
     model = wae.Model(opts)
