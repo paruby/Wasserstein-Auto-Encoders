@@ -60,7 +60,7 @@ def loss_init(model):
                                               kernel_size=[kernel_size,kernel_size],
                                               name='adv_cost_repr',
                                               reuse=True)
-            sq_diff = (real_img_repr - fake_img_repr)**2
+            sq_diff = (tf.nn.sigmoid(real_img_repr) - tf.nn.sigmoid(fake_img_repr))**2
             model.adv_cost_loss = tf.reduce_sum(tf.reduce_mean(sq_diff, axis=0), name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
