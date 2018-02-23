@@ -39,4 +39,5 @@ python -i load.py dsprites/exp10
 Todos:
 - mean/min/max log variance logging
 - plotting functions on model object for ease of visualising loaded models
-- adding dcgan architecture to harmonise with ilya's code
++ adding dcgan architecture to harmonise with ilya's code
+- add spherical prior / encoder 
