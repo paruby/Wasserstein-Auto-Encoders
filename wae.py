@@ -164,8 +164,8 @@ class Model(object):
         random_samples = []
         test_reconstructions = []
         print("Generating random samples: (each . is 5\%)")
-        for i in range(1000):
-            if i % 50 == 0:
+        for i in range(100):
+            if i % 5 == 0:
                 print('.', end='', flush=True)
             codes = self.sample_codes(batch_size=100)
             ims = self.decode(codes)
@@ -179,7 +179,7 @@ class Model(object):
             # reconstruct all data
             l = len(self.test_data)
             for i in range(l//100):
-                if i % 50 == 0:
+                if i % 5 == 0:
                     print('.', end='', flush=True)
                 batch = self.test_data[100*i:100*(i+1)]
                 encoded = self.encode(batch)
@@ -192,8 +192,8 @@ class Model(object):
                 test_reconstructions.append(decoded)
         else:
             # 10,000 samples
-            for i in range(1000):
-                if i % 50 == 0:
+            for i in range(100):
+                if i % 5 == 0:
                     print('.', end='', flush=True)
                 batch = self.test_data[100*i:100*(i+1)]
                 encoded = self.encode(batch)
