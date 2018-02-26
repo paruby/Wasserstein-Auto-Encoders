@@ -113,6 +113,12 @@ class Model(object):
                 self.disentanglement = disentanglement_metric.Disentanglement(self)
                 self.disentanglement.do_all(it)
 
+        # save random samples and test reconstructions for FID scores:
+        if 'FID_score_samples' in self.opts:
+            if self.opts['FID_score_samples'] is True:
+                self.save_FID_samples()
+
+
     def encode(self, images, mean=True):
         if mean is False:
             return self.sess.run(self.z_sample, feed_dict={self.input: images})
@@ -151,3 +157,40 @@ class Model(object):
     def load_saved_model(self):
         os.chdir(self.experiment_path)
         self.saver.restore(self.sess, tf.train.latest_checkpoint('checkpoints'))
+
+    def save_FID_samples(self):
+        # makes 10,000 random samples and 10,000 train reconstructions
+        # (or the whole train set is smaller than 10,000)
+        random_samples = []
+        test_reconstructions = []
+        for _ in range(1000):
+            codes = self.sample_codes(batch_size=100)
+            ims = self.decode(codes)
+            random_samples.append(ims)
+
+        random_samples = np.concatenate(random_samples)
+        np.save("output/random_samples.npy", random_samples)
+
+        if len(self.test_data) < 10000:
+            # reconstruct all data
+            l = len(self.test_data)
+            for i in range(l//100):
+                batch = self.test_data[100*i:100*(i+1)]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                test_reconstructions.append(decoded)
+            if 100*(i+1) < l:
+                batch = self.test_data[100*(i+1):]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                test_reconstructions.append(decoded)
+        else:
+            # 10,000 samples
+            for i in range(1000):
+                batch = self.test_data[100*i:100*(i+1)]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                test_reconstructions.append(decoded)
+
+        test_reconstructions = np.concatenate(test_reconstructions)
+        np.save("output/test_reconstructions.npy", test_reconstructions)
