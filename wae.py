@@ -163,6 +163,7 @@ class Model(object):
         # (or the whole train set is smaller than 10,000)
         random_samples = []
         test_reconstructions = []
+        train_reconstructions = []
         print("Generating random samples: (each . is 5\%)")
         for i in range(100):
             if i % 5 == 0:
@@ -174,7 +175,7 @@ class Model(object):
         random_samples = np.concatenate(random_samples)
         np.save("output/random_samples.npy", random_samples)
 
-        print("Generating train reconstructions:")
+        print("Generating test reconstructions:")
         if len(self.test_data) < 10000:
             # reconstruct all data
             l = len(self.test_data)
@@ -202,3 +203,32 @@ class Model(object):
 
         test_reconstructions = np.concatenate(test_reconstructions)
         np.save("output/test_reconstructions.npy", test_reconstructions)
+
+        print("Generating train reconstructions:")
+        if len(self.train_data) < 10000:
+            # reconstruct all data
+            l = len(self.train_data)
+            for i in range(l//100):
+                if i % 5 == 0:
+                    print('.', end='', flush=True)
+                batch = self.train_data[100*i:100*(i+1)]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                train_reconstructions.append(decoded)
+            if 100*(i+1) < l:
+                batch = self.train_data[100*(i+1):]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                train_reconstructions.append(decoded)
+        else:
+            # 10,000 samples
+            for i in range(100):
+                if i % 5 == 0:
+                    print('.', end='', flush=True)
+                batch = self.train_data[100*i:100*(i+1)]
+                encoded = self.encode(batch)
+                decoded = self.decode(encoded)
+                train_reconstructions.append(decoded)
+
+        train_reconstructions = np.concatenate(train_reconstructions)
+        np.save("output/train_reconstructions.npy", train_reconstructions)
