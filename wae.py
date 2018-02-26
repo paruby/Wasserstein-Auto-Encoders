@@ -163,7 +163,10 @@ class Model(object):
         # (or the whole train set is smaller than 10,000)
         random_samples = []
         test_reconstructions = []
-        for _ in range(1000):
+        print("Generating random samples: (each . is 5\%)")
+        for i in range(1000):
+            if i % 50 == 0:
+                print('.', end='', flush=True)
             codes = self.sample_codes(batch_size=100)
             ims = self.decode(codes)
             random_samples.append(ims)
@@ -171,10 +174,13 @@ class Model(object):
         random_samples = np.concatenate(random_samples)
         np.save("output/random_samples.npy", random_samples)
 
+        print("Generating train reconstructions:")
         if len(self.test_data) < 10000:
             # reconstruct all data
             l = len(self.test_data)
             for i in range(l//100):
+                if i % 50 == 0:
+                    print('.', end='', flush=True)
                 batch = self.test_data[100*i:100*(i+1)]
                 encoded = self.encode(batch)
                 decoded = self.decode(encoded)
@@ -187,6 +193,8 @@ class Model(object):
         else:
             # 10,000 samples
             for i in range(1000):
+                if i % 50 == 0:
+                    print('.', end='', flush=True)
                 batch = self.test_data[100*i:100*(i+1)]
                 encoded = self.encode(batch)
                 decoded = self.decode(encoded)
