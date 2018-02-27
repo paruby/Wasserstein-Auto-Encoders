@@ -63,6 +63,8 @@ if __name__ == "__main__":
         opts = config.grassli_WAE_opts
     elif FLAGS.experiment == 'celebA_dcgan_adv':
         opts = config.celebA_dcgan_adv_cost_opts
+    elif FLAGS.experiment == 'celebA_dcgan_adv_l2_filters':
+        opts = config.celebA_dcgan_adv_cost_l2_filters_opts
     else:
         assert False, "Invalid experiment defaults"
 
