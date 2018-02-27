@@ -310,6 +310,7 @@ celebA_dcgan_adv_cost_l2_filters_opts['encoder_distribution'] = 'deterministic'
 celebA_dcgan_adv_cost_l2_filters_opts['logvar-clipping'] = None
 celebA_dcgan_adv_cost_l2_filters_opts['z_prior'] = 'gaussian'
 celebA_dcgan_adv_cost_l2_filters_opts['loss_reconstruction'] = 'L2_squared+adversarial+l2_filter'
+celebA_dcgan_adv_cost_l2_filters_opts['adv_cost_lambda'] = 1.0
 celebA_dcgan_adv_cost_l2_filters_opts['adversarial_cost_n_filters'] = 4
 celebA_dcgan_adv_cost_l2_filters_opts['adversarial_cost_kernel_size'] = 3
 celebA_dcgan_adv_cost_l2_filters_opts['loss_regulariser'] = 'WAE_MMD'
