@@ -321,3 +321,4 @@ celebA_dcgan_adv_cost_l2_filters_opts['z_logvar_regularisation'] = None
 celebA_dcgan_adv_cost_l2_filters_opts['optimizer'] = 'adam'
 celebA_dcgan_adv_cost_l2_filters_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
 celebA_dcgan_adv_cost_l2_filters_opts['adv_cost_learning_rate_schedule'] = [(1e-5, 40000), (1e-6, 80001)]
+celebA_dcgan_adv_cost_l2_filters_opts['FID_score_samples'] = True
