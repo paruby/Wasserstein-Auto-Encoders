@@ -102,7 +102,10 @@ if __name__ == "__main__":
     if FLAGS.lambda_logvar_regularisation:
         opts['lambda_logvar_regularisation'] = FLAGS.lambda_logvar_regularisation
     if FLAGS.loss_regulariser:
-        opts['loss_regulariser'] = FLAGS.loss_regulariser
+        if FLAGS.loss_regulariser == "None":
+            opts['loss_regulariser'] = None
+        else:
+            opts['loss_regulariser'] = FLAGS.loss_regulariser
     if FLAGS.beta:
         opts['beta'] = FLAGS.beta
     if FLAGS.plot_losses:
