@@ -45,6 +45,8 @@ def loss_init(model):
             name="loss_reconstruction")
 
     elif model.opts['loss_reconstruction'] == 'L2_squared+adversarial':
+        if 'adv_cost_lambda' not in model.opts:
+            adv_cost_lambda = 1.0
         with tf.variable_scope('adversarial_cost'):
             out_im = tf.nn.sigmoid(model.x_logits_img_shape)
             n_filters = model.opts['adversarial_cost_n_filters']
@@ -64,6 +66,32 @@ def loss_init(model):
             model.adv_cost_loss = tf.reduce_sum(tf.reduce_mean(sq_diff, axis=0), name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
+
+    elif model.opts['loss_reconstruction'] == 'L2_squared+adversarial+l2_filter':
+        if 'adv_cost_lambda' not in model.opts:
+            adv_cost_lambda = 1.0
+        with tf.variable_scope('adversarial_cost'):
+            out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+            n_filters = model.opts['adversarial_cost_n_filters']
+            kernel_size = model.opts['adversarial_cost_kernel_size']
+            fake_img_repr  = tf.layers.conv2d(out_im,
+                                              filters=n_filters,
+                                              strides=1,
+                                              kernel_size=[kernel_size,kernel_size],
+                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=0.1),
+                                              name='adv_cost_repr')
+            real_img_repr  = tf.layers.conv2d(model.input,
+                                              filters=n_filters,
+                                              strides=1,
+                                              kernel_size=[kernel_size,kernel_size],
+                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=0.1),
+                                              name='adv_cost_repr',
+                                              reuse=True)
+            sq_diff = (tf.nn.sigmoid(real_img_repr) - tf.nn.sigmoid(fake_img_repr))**2
+            model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
+            l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
+            model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
+
 
     all_losses.append(model.loss_reconstruction)
 
