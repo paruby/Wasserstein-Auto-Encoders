@@ -41,6 +41,10 @@ parser.add_argument("--plot_losses",
                     help="Plot losses and least-gaussian-subspace: True/False:")
 parser.add_argument("--adversarial_cost_n_filters", type=int,
                     help="Number of convolutional filters to use for adversarial cost")
+parser.add_argument("--adv_cost_nlayers", type=int,
+                    help="Number of convolutional layers to use for adversarial cost")
+parser.add_argument("--adversarial_cost_kernel_size", type=int,
+                    help="Size of convolutional kernels to use for adversarial cost")
 
 FLAGS = parser.parse_args()
 
