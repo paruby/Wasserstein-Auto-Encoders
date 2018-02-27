@@ -119,6 +119,11 @@ if __name__ == "__main__":
             opts['plot_losses'] = False
     if FLAGS.adversarial_cost_n_filters:
         opts['adversarial_cost_n_filters'] = FLAGS.adversarial_cost_n_filters
+    if FLAGS.adv_cost_nlayers:
+        opts['adv_cost_nlayers'] = FLAGS.adv_cost_nlayers
+    if FLAGS.adversarial_cost_kernel_size:
+        opts['adversarial_cost_kernel_size'] = FLAGS.adversarial_cost_kernel_size
+
 
 
     model = wae.Model(opts)
