@@ -159,7 +159,7 @@ def loss_init(model):
                                              model.opts['lambda_imq'],
                                              name="loss_regulariser")
     elif model.opts['loss_regulariser'] is None:
-        model.loss_regulariser = tf.constant(0, name="loss_regulariser")
+        model.loss_regulariser = tf.constant(0, dtype=tf.float32, name="loss_regulariser")
 
     all_losses.append(model.loss_regulariser)
 
