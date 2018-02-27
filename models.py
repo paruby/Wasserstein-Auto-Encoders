@@ -110,17 +110,17 @@ def loss_init(model):
             layer_fake = out_im
             layer_real = model.input
             for i in range(adv_cost_nlayers-1):
-                layer_fake  = tf.layers.conv2d(layer_fake,
+                layer_fake  = lrelu(0.1, tf.layers.conv2d(layer_fake,
                                                   filters=n_filters,
                                                   strides=1,
                                                   kernel_size=[kernel_size,kernel_size],
-                                                  name='adv_cost_repr_%d' % i)
-                layer_real  = tf.layers.conv2d(layer_real,
+                                                  name='adv_cost_repr_%d' % i))
+                layer_real  = lrelu(0.1, tf.layers.conv2d(layer_real,
                                                   filters=n_filters,
                                                   strides=1,
                                                   kernel_size=[kernel_size,kernel_size],
                                                   name='adv_cost_repr_%d' % i,
-                                                  reuse=True)
+                                                  reuse=True))
 
             fake_img_repr  = tf.layers.conv2d(layer_fake,
                                               filters=n_filters,
@@ -542,3 +542,6 @@ def _decoder_FC_dsprites_init(model):
 
     model.x_logits_img_shape = tf.reshape(model.x_logits,[-1, model.data_dims[0], model.data_dims[1], 1],
                                           name="x_logits_img_shape")
+
+def lrelu(alpha, inputs):
+    return tf.maximum(inputs, alpha*inputs)
