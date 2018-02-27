@@ -70,6 +70,8 @@ def loss_init(model):
     elif model.opts['loss_reconstruction'] == 'L2_squared+adversarial+l2_filter':
         if 'adv_cost_lambda' not in model.opts:
             adv_cost_lambda = 1.0
+        else:
+            adv_cost_lambda = model.opts['adv_cost_lambda']
         with tf.variable_scope('adversarial_cost'):
             out_im = tf.nn.sigmoid(model.x_logits_img_shape)
             n_filters = model.opts['adversarial_cost_n_filters']
