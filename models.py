@@ -105,10 +105,19 @@ def loss_init(model):
             channels = int(out_im.get_shape()[-1])
             n_filters = model.opts['adversarial_cost_n_filters']
             kernel_size = model.opts['adversarial_cost_kernel_size']
-            w = tf.get_variable('adv_filter',
-                                [kernel_size, kernel_size, channels, n_filters],
-                                initializer=tf.truncated_normal_initializer(stddev=0.01))
-            w = tf.nn.l2_normalize(w, 2)
+            if 'adv_cost_normalise_filter' in model.opts:
+                if model.opts['adv_cost_normalise_filter'] is True:
+                    w = tf.get_variable('adv_filter',
+                                        [kernel_size**2, channels, n_filters],
+                                        initializer=tf.truncated_normal_initializer(stddev=0.01))
+                    w = tf.nn.l2_normalize(w, 0)
+                    w = w.reshape([kernel_size, kernel_size, channels, n_filters])
+            else:
+                w = tf.get_variable('adv_filter',
+                                    [kernel_size, kernel_size, channels, n_filters],
+                                    initializer=tf.truncated_normal_initializer(stddev=0.01))
+                w = tf.nn.l2_normalize(w, 2)
+
             bias = tf.get_variable('adv_bias',
                                    [n_filters],
                                    initializer=tf.constant_initializer(0.001))

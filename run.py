@@ -45,6 +45,11 @@ parser.add_argument("--adv_cost_nlayers", type=int,
                     help="Number of convolutional layers to use for adversarial cost")
 parser.add_argument("--adversarial_cost_kernel_size", type=int,
                     help="Size of convolutional kernels to use for adversarial cost")
+parser.add_argument("--adv_cost_lambda", type=float,
+                    help="Weighting of adversarial cost")
+parser.add_argument("--adv_cost_normalise_filter", type=bool,
+                    help="Whether to normalise adversarial cost across filters (default uses Sylvain normalisation across channels)")
+
 
 FLAGS = parser.parse_args()
 
@@ -123,6 +128,10 @@ if __name__ == "__main__":
         opts['adv_cost_nlayers'] = FLAGS.adv_cost_nlayers
     if FLAGS.adversarial_cost_kernel_size:
         opts['adversarial_cost_kernel_size'] = FLAGS.adversarial_cost_kernel_size
+    if FLAGS.adv_cost_lambda:
+        opts['adv_cost_lambda'] = FLAGS.adv_cost_lambda
+    if FLAGS.adv_cost_normalise_filter:
+        opts['adv_cost_normalise_filter'] = FLAGS.adv_cost_normalise_filter
 
 
 
