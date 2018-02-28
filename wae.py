@@ -91,7 +91,7 @@ class Model(object):
                     feed_dict={self.learning_rate: lr,
                                self.input: self.sample_minibatch(self.batch_size)}
                     )
-                if self.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv']:
+                if self.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm']:
                     self.sess.run(
                         self.adv_cost_train_step,
                         feed_dict={self.learning_rate: lr,
