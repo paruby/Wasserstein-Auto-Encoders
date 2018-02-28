@@ -90,7 +90,8 @@ def loss_init(model):
                                               name='adv_cost_repr',
                                               reuse=True)
             sq_diff = (real_img_repr - fake_img_repr)**2
-            model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
+            sq_diff = tf.reduce_mean(sq_diff, axis=[0,3]) # mean over batch and channels
+            model.adv_cost_loss = tf.reduce_sum(sq_diff, name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
@@ -136,6 +137,8 @@ def loss_init(model):
                                               name='adv_cost_repr',
                                               reuse=True)
             sq_diff = (real_img_repr - fake_img_repr)**2
+            sq_diff = tf.reduce_mean(sq_diff, axis=[0,3]) # mean over batch and channels
+            model.adv_cost_loss = tf.reduce_sum(sq_diff, name='adv_cost_loss')
             model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
