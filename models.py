@@ -89,7 +89,7 @@ def loss_init(model):
                                               kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=0.1),
                                               name='adv_cost_repr',
                                               reuse=True)
-            sq_diff = (tf.nn.sigmoid(real_img_repr) - tf.nn.sigmoid(fake_img_repr))**2
+            sq_diff = (real_img_repr - fake_img_repr)**2
             model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
