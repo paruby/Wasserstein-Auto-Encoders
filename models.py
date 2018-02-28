@@ -95,6 +95,36 @@ def loss_init(model):
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
+    elif model.opts['loss_reconstruction'] == 'L2_squared+adversarial+l2_norm':
+        if 'adv_cost_lambda' not in model.opts:
+            adv_cost_lambda = 1.0
+        else:
+            adv_cost_lambda = model.opts['adv_cost_lambda']
+        with tf.variable_scope('adversarial_cost'):
+            out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+            channels = int(out_im.get_shape()[-1])
+            n_filters = model.opts['adversarial_cost_n_filters']
+            kernel_size = model.opts['adversarial_cost_kernel_size']
+            w = tf.get_variable('adv_filter',
+                                [kernel_size, kernel_size, channels, n_filters],
+                                initializer=tf.truncated_normal_initializer(stddev=0.01))
+            w = tf.nn.l2_normalize(w, 2)
+            bias = tf.get_variable('adv_bias',
+                                   [n_filters],
+                                   initializer=tf.constant_initializer(0.001))
+
+            fake_img_repr = tf.nn.conv2d(out_im, w, strides=[1,1,1,1], padding="SAME")
+            fake_img_repr = tf.nn.bias_add(fake_img_repr, bias)
+
+            real_img_repr = tf.nn.conv2d(model.input, w, strides=[1,1,1,1], padding="SAME")
+            real_img_repr = tf.nn.bias_add(real_img_repr, bias)
+
+            sq_diff = (real_img_repr - fake_img_repr)**2
+            sq_diff = tf.reduce_mean(sq_diff, axis=[0,3]) # mean over batch and channels
+            model.adv_cost_loss = tf.reduce_sum(sq_diff, name='adv_cost_loss')
+            l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
+            model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
+
     elif model.opts['loss_reconstruction'] == 'L2_squared+multilayer_conv_adv':
         if 'adv_cost_lambda' not in model.opts:
             adv_cost_lambda = 1.0
@@ -142,6 +172,31 @@ def loss_init(model):
             model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
+
+    elif model.opts['loss_reconstruction'] == 'L2_squared+patch_var':
+        out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+        height, width, channels = [int(out_im.get_shape()[i]) for i in range(1,4)]
+        kernel_size = model.opts['adversarial_cost_kernel_size']
+        w = tf.eye(num_rows=chane)
+
+        layer_fake  = lrelu(0.1, tf.layers.conv2d(layer_fake,
+                                          filters=n_filters,
+                                          strides=1,
+                                          kernel_size=[kernel_size,kernel_size],
+                                          name='adv_cost_repr_%d' % i))
+        layer_real  = lrelu(0.1, tf.layers.conv2d(layer_real,
+                                          filters=n_filters,
+                                          strides=1,
+                                          kernel_size=[kernel_size,kernel_size],
+                                          name='adv_cost_repr_%d' % i,
+                                          reuse=True))
+
+        sq_diff = (real_img_repr - fake_img_repr)**2
+        sq_diff = tf.reduce_mean(sq_diff, axis=[0,3]) # mean over batch and channels
+        model.adv_cost_loss = tf.reduce_sum(sq_diff, name='adv_cost_loss')
+        model.adv_cost_loss = tf.reduce_mean(sq_diff, name='adv_cost_loss')
+        l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
+        model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
