@@ -111,7 +111,7 @@ def loss_init(model):
                                         [kernel_size**2, channels, n_filters],
                                         initializer=tf.truncated_normal_initializer(stddev=0.01))
                     w = tf.nn.l2_normalize(w, 0)
-                    w = w.reshape([kernel_size, kernel_size, channels, n_filters])
+                    w = tf.reshape(w, [kernel_size, kernel_size, channels, n_filters])
             else:
                 w = tf.get_variable('adv_filter',
                                     [kernel_size, kernel_size, channels, n_filters],
