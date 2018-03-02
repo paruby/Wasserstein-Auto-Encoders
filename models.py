@@ -194,6 +194,7 @@ def loss_init(model):
         kernel_size = model.opts['adversarial_cost_kernel_size']
         w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
         w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
+        w_sum = w_sum / (kernel_size*kernel_size)
 
         out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
         real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
