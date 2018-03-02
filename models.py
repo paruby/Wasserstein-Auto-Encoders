@@ -245,7 +245,7 @@ def optimizer_init(model):
         model.learning_rate = tf.placeholder(tf.float32)
         model.train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(model.loss_total, var_list=encoder_vars+decoder_vars)
 
-        if model.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm', 'patch_moments']:
+        if model.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm']:
             adv_cost_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='adversarial_cost')
             model.adv_cost_train_step = tf.train.AdamOptimizer(model.learning_rate).minimize(-model.adv_cost_loss, var_list=adv_cost_vars)
 
