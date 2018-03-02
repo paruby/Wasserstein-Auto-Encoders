@@ -183,30 +183,31 @@ def loss_init(model):
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
     elif model.opts['loss_reconstruction'] == 'patch_moments':
-        # cost is the difference between mean and variance of local patches.
-        # Take squared difference between mean and variance for patches and sum up
-        out_im = tf.nn.sigmoid(model.x_logits_img_shape)
-        out_im_sq = out_im**2
-        real_im = model.input
-        real_im_sq = model.input**2
+        with tf.variable_scope('adversarial_cost'):
+            # cost is the difference between mean and variance of local patches.
+            # Take squared difference between mean and variance for patches and sum up
+            out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+            out_im_sq = out_im**2
+            real_im = model.input
+            real_im_sq = model.input**2
 
-        height, width, channels = [int(out_im.get_shape()[i]) for i in range(1,4)]
-        kernel_size = model.opts['adversarial_cost_kernel_size']
-        w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
-        w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
+            height, width, channels = [int(out_im.get_shape()[i]) for i in range(1,4)]
+            kernel_size = model.opts['adversarial_cost_kernel_size']
+            w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
+            w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
 
-        out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
-        real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
+            out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
+            real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
 
-        out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
-        real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
+            out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
+            real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
 
-        # mean over batch and channels
-        sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=[0,3])
-        sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=[0,3])
+            # mean over batch and channels
+            sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=[0,3])
+            sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=[0,3])
 
-        model.adv_cost_loss = tf.reduce_mean(sq_mean_diff + sq_var_diff, name='adv_cost_loss')
-        model.loss_reconstruction = tf.add(model.adv_cost_loss, 0.0, name='loss_reconstruction')
+            model.adv_cost_loss = tf.reduce_mean(sq_mean_diff + sq_var_diff, name='adv_cost_loss')
+            model.loss_reconstruction = tf.add(model.adv_cost_loss, 0.0, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
