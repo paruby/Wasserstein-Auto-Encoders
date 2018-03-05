@@ -196,20 +196,21 @@ def loss_init(model):
         w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
         w_sum = w_sum / (kernel_size*kernel_size)
 
-        if 'pixel_wise_l2' in model.opts:
-            if model.opts['pixel_wise_l2'] is True:
-                out_im_mean = out_im
-                real_im_mean = real_im
-        else:
-            out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
-            real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
+        out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
+        real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
 
         out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
         real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
 
-        # mean over batch
-        sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=0)
-        sq_mean_diff = tf.reduce_sum(sq_mean_diff)
+        if 'pixel_wise_l2' in model.opts:
+            if model.opts['pixel_wise_l2'] is True:
+                # pixelwise l2
+                sq_mean_diff = tf.reduce_mean((out_im - real_im)**2, axis=0)
+                sq_mean_diff = tf.reduce_sum(sq_mean_diff)
+        else:
+            # l2 over mean of patch
+            sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=0)
+            sq_mean_diff = tf.reduce_sum(sq_mean_diff)
 
         sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
         sq_var_diff = tf.reduce_sum(sq_var_diff)
