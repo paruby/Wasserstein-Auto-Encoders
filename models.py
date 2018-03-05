@@ -215,7 +215,7 @@ def loss_init(model):
         sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
         sq_var_diff = tf.reduce_sum(sq_var_diff)
 
-        model.loss_reconstruction = tf.add(sq_mean_diff + sq_var_diff, name='loss_reconstruction')
+        model.loss_reconstruction = tf.add(sq_mean_diff, sq_var_diff, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
