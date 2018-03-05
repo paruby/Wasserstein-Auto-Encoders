@@ -49,6 +49,9 @@ parser.add_argument("--adv_cost_lambda", type=float,
                     help="Weighting of adversarial cost")
 parser.add_argument("--adv_cost_normalise_filter", type=bool,
                     help="Whether to normalise adversarial cost across filters (default uses Sylvain normalisation across channels)")
+parser.add_argument("--pixel_wise_l2", type=bool,
+                    help="Should mean pixel loss be over individual pixels or patches for patch_moments?")
+
 
 
 FLAGS = parser.parse_args()
@@ -132,6 +135,8 @@ if __name__ == "__main__":
         opts['adv_cost_lambda'] = FLAGS.adv_cost_lambda
     if FLAGS.adv_cost_normalise_filter:
         opts['adv_cost_normalise_filter'] = FLAGS.adv_cost_normalise_filter
+    if FLAGS.pixel_wise_l2:
+        opts['pixel_wise_l2'] = FLAGS.pixel_wise_l2
 
 
 
