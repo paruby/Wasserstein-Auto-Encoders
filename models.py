@@ -209,9 +209,12 @@ def loss_init(model):
 
         # mean over batch
         sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=0)
-        sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
+        sq_mean_diff = tf.reduce_sum(sq_mean_diff)
 
-        model.loss_reconstruction = tf.reduce_sum(sq_mean_diff + sq_var_diff, name='loss_reconstruction')
+        sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
+        sq_var_diff = tf.reduce_sum(sq_var_diff)
+
+        model.loss_reconstruction = tf.add(sq_mean_diff + sq_var_diff, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
