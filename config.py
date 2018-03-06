@@ -177,6 +177,7 @@ celebA_dcgan_deterministic_opts['IMQ_length_params'] = [c*celebA_dcgan_determini
 celebA_dcgan_deterministic_opts['z_logvar_regularisation'] = None
 celebA_dcgan_deterministic_opts['optimizer'] = 'adam'
 celebA_dcgan_deterministic_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+celebA_dcgan_deterministic_opts['FID_score_samples'] = True
 
 
 
@@ -280,6 +281,7 @@ celebA_dcgan_adv_cost_opts['z_logvar_regularisation'] = None
 celebA_dcgan_adv_cost_opts['optimizer'] = 'adam'
 celebA_dcgan_adv_cost_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
 celebA_dcgan_adv_cost_opts['adv_cost_learning_rate_schedule'] = [(1e-5, 40000), (1e-6, 80001)]
+celebA_dcgan_adv_cost_opts['FID_score_samples'] = True
 
 
 
