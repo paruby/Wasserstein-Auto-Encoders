@@ -55,6 +55,12 @@ def load_data(model, seed=None):
             print("Dataset file does not exist. You can download it here: https://github.com/deepmind/dsprites-dataset/ Save dsprites_ndarray_....npz in datasets folder as dsprites.npz")
         data = dsprites_zip['imgs']
 
+    elif dataset == 'cifar':
+        try:
+            data = np.load(ROOT_FOLDER + '/datasets/cifar10.npy')
+        except FileNotFoundError:
+            print("Dataset file does not exist.")
+
     elif dataset == 'celebA':
         try:
             data = np.load(ROOT_FOLDER + '/datasets/celebA.npy')
@@ -559,7 +565,7 @@ def lerp(v1, v2, steps):
 def opts_check(model):
     opts = model.opts
     assert type(opts['save_every']) is int
-    assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini', 'grassli']
+    assert opts['dataset'] in ['fading_squares', 'dsprites', 'celebA', 'celebA_mini', 'grassli', 'cifar']
     if opts['dataset'] != 'dsprites':
         assert 'disentanglement_metric' not in opts
     if 'disentanglement_metric' in opts:
