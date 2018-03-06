@@ -215,7 +215,12 @@ def loss_init(model):
         sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
         sq_var_diff = tf.reduce_sum(sq_var_diff)
 
-        model.loss_reconstruction = tf.add(sq_mean_diff, sq_var_diff, name='loss_reconstruction')
+        if 'adv_cost_lambda' in model.opts:
+            patch_var_lambda = model.opts['adv_cost_lambda']
+        else:
+            patch_var_lambda = 1.0
+
+        model.loss_reconstruction = tf.add(sq_mean_diff, patch_var_lambda * sq_var_diff, name='loss_reconstruction')
 
     all_losses.append(model.loss_reconstruction)
 
