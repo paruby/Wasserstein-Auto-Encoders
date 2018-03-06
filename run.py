@@ -51,7 +51,14 @@ parser.add_argument("--adv_cost_normalise_filter", type=bool,
                     help="Whether to normalise adversarial cost across filters (default uses Sylvain normalisation across channels)")
 parser.add_argument("--pixel_wise_l2", type=bool,
                     help="Should mean pixel loss be over individual pixels or patches for patch_moments?")
-
+parser.add_argument("--encoder_num_filters", type=int,
+                    help="Number of filters for the encoder")
+parser.add_argument("--decoder_num_filters", type=int,
+                    help="Number of filters for the decoder")
+parser.add_argument("--encoder_num_layers", type=int,
+                    help="Number of layers for the encoder")
+parser.add_argument("--decoder_num_layers", type=int,
+                    help="Number of layers for the decoder")
 
 
 FLAGS = parser.parse_args()
@@ -139,8 +146,14 @@ if __name__ == "__main__":
         opts['adv_cost_normalise_filter'] = FLAGS.adv_cost_normalise_filter
     if FLAGS.pixel_wise_l2:
         opts['pixel_wise_l2'] = FLAGS.pixel_wise_l2
-
-
+    if FLAGS.encoder_num_filters:
+        opts['encoder_num_filters'] = FLAGS.encoder_num_filters
+    if FLAGS.decoder_num_filters:
+        opts['decoder_num_filters'] = FLAGS.decoder_num_filters
+    if FLAGS.encoder_num_layers:
+        opts['encoder_num_layers'] = FLAGS.encoder_num_layers
+    if FLAGS.decoder_num_layers:
+        opts['decoder_num_layers'] = FLAGS.decoder_num_layers
 
     model = wae.Model(opts)
     model.train()
