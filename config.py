@@ -366,3 +366,44 @@ cifar_dcgan_ae_opts['optimizer'] = 'adam'
 cifar_dcgan_ae_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
 cifar_dcgan_ae_opts['adv_cost_learning_rate_schedule'] = [(1e-5, 40000), (1e-6, 80001)]
 cifar_dcgan_ae_opts['FID_score_samples'] = True
+
+
+
+cifar_dcgan_patch_moments_opts = {}
+cifar_dcgan_patch_moments_opts['dataset'] = 'cifar'
+cifar_dcgan_patch_moments_opts['experiment_path'] = 'experiments/cifar/dcgan/unregularised/exp1'
+cifar_dcgan_patch_moments_opts['z_dim'] = 64
+cifar_dcgan_patch_moments_opts['print_log_information'] = True
+cifar_dcgan_patch_moments_opts['make_pictures_every'] = 1000
+cifar_dcgan_patch_moments_opts['save_every'] = 10000
+cifar_dcgan_patch_moments_opts['plot_axis_walks'] = False
+#cifar_dcgan_patch_moments_opts['axis_walk_range'] = 1
+cifar_dcgan_patch_moments_opts['plot_losses'] =  True
+cifar_dcgan_patch_moments_opts['print_log_information'] = True
+cifar_dcgan_patch_moments_opts['batch_size'] = 100
+cifar_dcgan_patch_moments_opts["encoder_architecture"] = 'dcgan'
+cifar_dcgan_patch_moments_opts["decoder_architecture"] = 'dcgan'
+
+cifar_dcgan_patch_moments_opts['encoder_num_filters'] = 512
+cifar_dcgan_patch_moments_opts['encoder_num_layers'] = 4
+cifar_dcgan_patch_moments_opts['decoder_num_filters'] = 512
+cifar_dcgan_patch_moments_opts['decoder_num_layers'] = 4
+cifar_dcgan_patch_moments_opts['conv_filter_dim'] = 4
+
+cifar_dcgan_patch_moments_opts['z_mean_activation'] = None
+cifar_dcgan_patch_moments_opts['encoder_distribution'] = 'deterministic'
+cifar_dcgan_patch_moments_opts['logvar-clipping'] = None
+cifar_dcgan_patch_moments_opts['z_prior'] = 'gaussian'
+cifar_dcgan_patch_moments_opts['loss_reconstruction'] = 'patch_moments'
+cifar_dcgan_patch_moments_opts['pixel_wise_l2'] = True
+cifar_dcgan_patch_moments_opts['adv_cost_lambda'] = 1.0
+cifar_dcgan_patch_moments_opts['adversarial_cost_kernel_size'] = 3
+cifar_dcgan_patch_moments_opts['loss_regulariser'] = None
+cifar_dcgan_patch_moments_opts['lambda_imq'] = 400.0
+coeffs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0]
+cifar_dcgan_patch_moments_opts['IMQ_length_params'] = [c*cifar_dcgan_patch_moments_opts['z_dim'] for c in coeffs]
+cifar_dcgan_patch_moments_opts['z_logvar_regularisation'] = None
+cifar_dcgan_patch_moments_opts['optimizer'] = 'adam'
+cifar_dcgan_patch_moments_opts['learning_rate_schedule'] = [(1e-4, 40000), (1e-5, 80001)]
+cifar_dcgan_patch_moments_opts['adv_cost_learning_rate_schedule'] = [(1e-5, 40000), (1e-6, 80001)]
+cifar_dcgan_patch_moments_opts['FID_score_samples'] = True

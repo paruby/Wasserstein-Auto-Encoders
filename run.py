@@ -86,6 +86,8 @@ if __name__ == "__main__":
         opts = config.celebA_dcgan_adv_cost_l2_filters_opts
     elif FLAGS.experiment == 'cifar_dcgan_ae':
         opts = config.cifar_dcgan_ae_opts
+    elif FLAGS.experiment == 'cifar_dcgan_patch_moments':
+        opts = config.cifar_dcgan_patch_moments_opts
     else:
         assert False, "Invalid experiment defaults"
 
