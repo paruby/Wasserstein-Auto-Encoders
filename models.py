@@ -191,16 +191,40 @@ def loss_init(model):
         real_im_sq = model.input**2
 
         height, width, channels = [int(out_im.get_shape()[i]) for i in range(1,4)]
-        kernel_size = model.opts['adversarial_cost_kernel_size']
-        w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
-        w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
-        w_sum = w_sum / (kernel_size*kernel_size)
 
-        out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
-        real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
+        if model.opts['adversarial_cost_kernel_size'] != -1:
+            kernel_size = model.opts['adversarial_cost_kernel_size']
+            w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
+            w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
+            w_sum = w_sum / (kernel_size*kernel_size)
 
-        out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
-        real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
+            out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
+            real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
+
+            out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
+            real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
+
+            sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
+            sq_var_diff = tf.reduce_sum(sq_var_diff)
+        else:
+            # sum patch variances using kernels of size 3 4 and 5
+            var_diff = 0
+            for kernel_size in [3, 4, 5]:
+                w_sum = tf.eye(num_rows=channels, num_columns=channels, batch_shape=[kernel_size * kernel_size])
+                w_sum = tf.reshape(w_sum, [kernel_size, kernel_size, channels, channels])
+                w_sum = w_sum / (kernel_size*kernel_size)
+
+                out_im_mean = tf.nn.conv2d(out_im, w_sum, strides=[1,1,1,1], padding='VALID')
+                real_im_mean = tf.nn.conv2d(real_im, w_sum, strides=[1,1,1,1], padding='VALID')
+
+                out_im_var = tf.nn.conv2d(out_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - out_im_mean**2
+                real_im_var = tf.nn.conv2d(real_im_sq, w_sum, strides=[1,1,1,1], padding='VALID') - real_im_mean**2
+
+                sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
+                sq_var_diff = tf.reduce_sum(sq_var_diff)
+
+                var_diff += sq_var_diff
+            sq_var_diff = var_diff
 
         if 'pixel_wise_l2' in model.opts:
             if model.opts['pixel_wise_l2'] is True:
@@ -212,8 +236,7 @@ def loss_init(model):
             sq_mean_diff = tf.reduce_mean((out_im_mean - real_im_mean)**2, axis=0)
             sq_mean_diff = tf.reduce_sum(sq_mean_diff)
 
-        sq_var_diff = tf.reduce_mean((out_im_var - real_im_var)**2, axis=0)
-        sq_var_diff = tf.reduce_sum(sq_var_diff)
+
 
         if 'adv_cost_lambda' in model.opts:
             patch_var_lambda = model.opts['adv_cost_lambda']
