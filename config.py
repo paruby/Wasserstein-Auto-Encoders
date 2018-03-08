@@ -394,10 +394,14 @@ celebA_conv_adv_opts['z_mean_activation'] = None
 celebA_conv_adv_opts['encoder_distribution'] = 'deterministic'
 celebA_conv_adv_opts['logvar-clipping'] = None
 celebA_conv_adv_opts['z_prior'] = 'gaussian'
+
 celebA_conv_adv_opts['loss_reconstruction'] = 'normalised_conv_adv'
 celebA_conv_adv_opts['adv_cost_lambda'] = 1.0
 celebA_conv_adv_opts['patch_classifier_lambda'] = 0.0
 celebA_conv_adv_opts['l2_lambda'] = 1.0
+celebA_conv_adv_opts['adversarial_cost_n_filters'] = 128
+celebA_conv_adv_opts['use_sq_features'] = True
+
 celebA_conv_adv_opts['loss_regulariser'] = None
 celebA_conv_adv_opts['lambda_imq'] = 400.0
 coeffs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.5, 0.8, 1.0, 2.0]
