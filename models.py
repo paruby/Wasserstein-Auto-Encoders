@@ -164,7 +164,7 @@ def loss_init(model):
             else:
                 real_input = real_im
                 out_input = out_im
-            batch = int(out_input.get_shape()[0])
+
             height = int(out_input.get_shape()[1])
             width = int(out_input.get_shape()[2])
             channels = int(out_input.get_shape()[-1])
