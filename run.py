@@ -59,6 +59,10 @@ parser.add_argument("--encoder_num_layers", type=int,
                     help="Number of layers for the encoder")
 parser.add_argument("--decoder_num_layers", type=int,
                     help="Number of layers for the decoder")
+parser.add_argument("--l2_lambda", type=float,
+                    help="Weighting of l2 penalty")
+parser.add_argument("--patch_classifier_lambda", type=float,
+                    help="Weighting of the patch classification penalty")
 
 
 FLAGS = parser.parse_args()
@@ -88,6 +92,8 @@ if __name__ == "__main__":
         opts = config.cifar_dcgan_ae_opts
     elif FLAGS.experiment == 'cifar_dcgan_patch_moments':
         opts = config.cifar_dcgan_patch_moments_opts
+    elif FLAGS.experiment == 'celebA_conv_adv':
+        opts = config.celebA_conv_adv_opts
     else:
         assert False, "Invalid experiment defaults"
 
@@ -156,6 +162,10 @@ if __name__ == "__main__":
         opts['encoder_num_layers'] = FLAGS.encoder_num_layers
     if FLAGS.decoder_num_layers:
         opts['decoder_num_layers'] = FLAGS.decoder_num_layers
+    if FLAGS.l2_lambda:
+        opts['l2_lambda'] = FLAGS.l2_lambda
+    if FLAGS.patch_classifier_lambda:
+        opts['patch_classifier_lambda'] = FLAGS.patch_classifier_lambda
 
     model = wae.Model(opts)
     model.train()

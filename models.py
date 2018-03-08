@@ -134,6 +134,94 @@ def loss_init(model):
             l2_sq_loss = tf.reduce_sum(tf.reduce_mean((out_im - model.input)**2, axis=0))
             model.loss_reconstruction = tf.add(adv_cost_lambda * model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
 
+    elif model.opts['loss_reconstruction'] == 'normalised_conv_adv':
+        if 'adv_cost_lambda' not in model.opts:
+            # weighting of l2 difference between featurised versions of images
+            adv_cost_lambda = 1.0
+        else:
+            adv_cost_lambda = model.opts['adv_cost_lambda']
+        if 'l2_lambda' not in model.opts:
+            # weighting of pixelwise l2 loss
+            l2_lambda = 1.0
+        else:
+            l2_lambda = model.opts['l2_lambda']
+        if 'patch_classifier_lambda' not in model.opts:
+            # weighting of patch classifier
+            patch_classifier_lambda = 1.0
+        else:
+            patch_classifier_lambda = model.opts['patch_classifier_lambda']
+
+
+        with tf.variable_scope('adversarial_cost'):
+            out_im = tf.nn.sigmoid(model.x_logits_img_shape)
+            real_im = model.input
+            if 'use_sq_features' in model.opts:
+                if model.opts['adv_use_sq_features'] is True:
+                    out_im_sq = out_im**2
+                    out_input = tf.concat([out_im, out_im_sq], axis=-1)
+                    real_im_sq = real_im**2
+                    real_input = tf.concat([real_im, real_im_sq], axis=-1)
+            else:
+                real_input = real_im
+                out_input = out_im
+            batch = int(out_input.get_shape()[0])
+            height = int(out_input.get_shape()[1])
+            width = int(out_input.get_shape()[2])
+            channels = int(out_input.get_shape()[-1])
+            n_filters = model.opts['adversarial_cost_n_filters']
+            adversarial_cost = 0
+
+            for kernel_size in [3,4,5]:
+                w = tf.get_variable('adv_filter_%d' % kernel_size,
+                                    [(kernel_size**2) * channels, n_filters],
+                                    initializer=tf.truncated_normal_initializer(stddev=0.01))
+                w = tf.nn.l2_normalize(w, 0)
+                w = tf.reshape(w, [kernel_size, kernel_size, channels, n_filters])
+
+
+                bias = tf.get_variable('adv_bias_%d' % kernel_size,
+                                       [n_filters],
+                                       initializer=tf.constant_initializer(0.001))
+
+                fake_img_repr = tf.nn.conv2d(out_input, w, strides=[1,1,1,1], padding="SAME")
+                fake_img_repr = tf.nn.bias_add(fake_img_repr, bias)
+
+                real_img_repr = tf.nn.conv2d(real_input, w, strides=[1,1,1,1], padding="SAME")
+                real_img_repr = tf.nn.bias_add(real_img_repr, bias)
+
+                sq_diff = (real_img_repr - fake_img_repr)**2
+                sq_diff = tf.reduce_mean(sq_diff, axis=[0,3]) # mean over batch and channels
+                sq_diff = tf.reduce_sum(sq_diff)
+
+                adversarial_cost += adv_cost_lambda * sq_diff
+
+                real_img_repr = lrelu(0.1, real_img_repr)
+                fake_img_repr = lrelu(0.1, fake_img_repr)
+                w = tf.get_variable('adv_filter_layer2',[1, 1, n_filters, 1],
+                                    initializer=tf.truncated_normal_initializer(stddev=0.01))
+
+                real_img_repr = tf.nn.conv2d(real_img_repr, w, strides=[1,1,1,1], padding="SAME")
+                real_img_logits = tf.reshape(real_img_repr, shape=[-1, height*width])
+                fake_img_repr = tf.nn.conv2d(fake_img_repr, w, strides=[1,1,1,1], padding="SAME")
+                fake_img_logits = tf.reshape(fake_img_repr, shape=[-1, height*width])
+
+                patch_classification_fake = tf.nn.sigmoid_cross_entropy_with_logits(
+                                            logits=fake_img_logits, labels=tf.zeros_like(fake_img_logits))
+                patch_classification_real = tf.nn.sigmoid_cross_entropy_with_logits(
+                                            logits=real_img_logits, labels=tf.ones_like(real_img_logits))
+
+                patch_classification_real = tf.reduce_mean(patch_classification_real)
+                patch_classification_fake = tf.reduce_mean(patch_classification_fake)
+
+                patch_classification_loss = patch_classification_fake + patch_classification_real
+
+                adversarial_cost += patch_classifier_lambda * patch_classification_loss
+
+            model.adv_cost_loss = tf.add(adversarial_cost, 0, name='adv_cost_loss')
+            l2_sq_loss = l2_lambda * tf.reduce_sum(tf.reduce_mean((out_im - real_im)**2, axis=0))
+            model.loss_reconstruction = tf.add(model.adv_cost_loss, l2_sq_loss, name='loss_reconstruction')
+
+
     elif model.opts['loss_reconstruction'] == 'L2_squared+multilayer_conv_adv':
         if 'adv_cost_lambda' not in model.opts:
             adv_cost_lambda = 1.0

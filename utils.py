@@ -595,7 +595,7 @@ def opts_check(model):
     assert opts['encoder_distribution'] in ['deterministic', 'gaussian', 'uniform']
     assert opts['logvar-clipping'] is None or (len(opts['logvar-clipping']) == 2 and all([type(i) is int for i in opts['logvar-clipping']]))
     assert opts['z_prior'] in ['gaussian', 'uniform']
-    assert opts['loss_reconstruction'] in ['bernoulli', 'L2_squared', 'L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm', 'patch_moments']
+    assert opts['loss_reconstruction'] in ['bernoulli', 'L2_squared', 'L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm', 'patch_moments', 'normalised_conv_adv']
     if opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv']:
         assert type(opts['adversarial_cost_n_filters']) is int
         assert type(opts['adversarial_cost_kernel_size']) is int
