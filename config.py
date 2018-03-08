@@ -400,7 +400,7 @@ celebA_conv_adv_opts['adv_cost_lambda'] = 1.0
 celebA_conv_adv_opts['patch_classifier_lambda'] = 0.0
 celebA_conv_adv_opts['l2_lambda'] = 1.0
 celebA_conv_adv_opts['adversarial_cost_n_filters'] = 128
-celebA_conv_adv_opts['use_sq_features'] = True
+celebA_conv_adv_opts['adv_use_sq_features'] = True
 
 celebA_conv_adv_opts['loss_regulariser'] = None
 celebA_conv_adv_opts['lambda_imq'] = 400.0

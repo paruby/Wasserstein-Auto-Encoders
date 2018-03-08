@@ -155,7 +155,7 @@ def loss_init(model):
         with tf.variable_scope('adversarial_cost'):
             out_im = tf.nn.sigmoid(model.x_logits_img_shape)
             real_im = model.input
-            if 'use_sq_features' in model.opts:
+            if 'adv_use_sq_features' in model.opts:
                 if model.opts['adv_use_sq_features'] is True:
                     out_im_sq = out_im**2
                     out_input = tf.concat([out_im, out_im_sq], axis=-1)
