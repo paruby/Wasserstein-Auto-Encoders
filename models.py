@@ -199,7 +199,8 @@ def loss_init(model):
                 fake_img_repr = lrelu(0.1, fake_img_repr)
                 w = tf.get_variable('adv_filter_layer2_%d' % kernel_size,[1, 1, n_filters, 1],
                                     initializer=tf.truncated_normal_initializer(stddev=0.01))
-
+                w = tf.nn.l2_normalize(w, 2)
+                
                 real_img_repr = tf.nn.conv2d(real_img_repr, w, strides=[1,1,1,1], padding="SAME")
                 real_img_logits = tf.reshape(real_img_repr, shape=[-1, height*width])
                 fake_img_repr = tf.nn.conv2d(fake_img_repr, w, strides=[1,1,1,1], padding="SAME")
