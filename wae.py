@@ -65,13 +65,12 @@ class Model(object):
         self.saver.restore(self.sess, model_path)
         print("Model restored from : %s" % model_path)
 
-    def train(self):
+    def train(self, it=0):
         print("Beginning training")
         if self.opts['optimizer'] == 'adam':
             learning_rates = [i[0] for i in self.opts['learning_rate_schedule']]
             iterations_list = [i[1] for i in self.opts['learning_rate_schedule']]
             total_num_iterations = iterations_list[-1]
-            it = 0
             lr_counter = 0
             lr = learning_rates[lr_counter]
             lr_iterations = iterations_list[lr_counter]
@@ -81,7 +80,7 @@ class Model(object):
                 if it % 100 == 0:
                     print('.', end='', flush=True)
                 it += 1
-                if it > lr_iterations:
+                while it > lr_iterations:
                     lr_counter += 1
                     lr = learning_rates[lr_counter]
                     lr_iterations = iterations_list[lr_counter]

@@ -97,74 +97,74 @@ if __name__ == "__main__":
     else:
         assert False, "Invalid experiment defaults"
 
-    if FLAGS.dataset:
+    if FLAGS.dataset is not None:
         opts['dataset'] = FLAGS.dataset
-    if FLAGS.z_dim:
+    if FLAGS.z_dim is not None:
         opts['z_dim'] = FLAGS.z_dim
-    if FLAGS.lambda_imq:
+    if FLAGS.lambda_imq is not None:
         opts['lambda_imq'] = FLAGS.lambda_imq
-    if FLAGS.experiment_path:
+    if FLAGS.experiment_path is not None:
         opts['experiment_path'] = FLAGS.experiment_path
-    if FLAGS.encoder_distribution:
+    if FLAGS.encoder_distribution is not None:
         opts['encoder_distribution'] = FLAGS.encoder_distribution
-    if FLAGS.z_prior:
+    if FLAGS.z_prior is not None:
         opts['z_prior'] = FLAGS.z_prior
-    if FLAGS.loss_reconstruction:
+    if FLAGS.loss_reconstruction is not None:
         opts['loss_reconstruction'] = FLAGS.loss_reconstruction
-    if FLAGS.disentanglement_metric:
+    if FLAGS.disentanglement_metric is not None:
         opts['disentanglement_metric'] = FLAGS.disentanglement_metric
-    if FLAGS.make_pictures_every:
+    if FLAGS.make_pictures_every is not None:
         opts['make_pictures_every'] = FLAGS.make_pictures_every
-    if FLAGS.save_every:
+    if FLAGS.save_every is not None:
         opts['save_every'] = FLAGS.save_every
-    if FLAGS.batch_size:
+    if FLAGS.batch_size is not None:
         opts['batch_size'] = FLAGS.batch_size
-    if FLAGS.encoder_architecture:
+    if FLAGS.encoder_architecture is not None:
         opts['encoder_architecture'] = FLAGS.encoder_architecture
-    if FLAGS.decoder_architecture:
+    if FLAGS.decoder_architecture is not None:
         opts['decoder_architecture'] = FLAGS.decoder_architecture
-    if FLAGS.z_logvar_regularisation:
-        if FLAGS.z_logvar_regularisation == "None":
+    if FLAGS.z_logvar_regularisation is not None:
+        if FLAGS.z_logvar_regularisation == "None" is not None:
             opts['z_logvar_regularisation'] = None
         else:
             opts['z_logvar_regularisation'] = FLAGS.z_logvar_regularisation
-    if FLAGS.lambda_logvar_regularisation:
+    if FLAGS.lambda_logvar_regularisation is not None:
         opts['lambda_logvar_regularisation'] = FLAGS.lambda_logvar_regularisation
-    if FLAGS.loss_regulariser:
+    if FLAGS.loss_regulariser is not None:
         if FLAGS.loss_regulariser == "None":
             opts['loss_regulariser'] = None
         else:
             opts['loss_regulariser'] = FLAGS.loss_regulariser
-    if FLAGS.beta:
+    if FLAGS.beta is not None:
         opts['beta'] = FLAGS.beta
-    if FLAGS.plot_losses:
+    if FLAGS.plot_losses is not None:
         if FLAGS.plot_losses == "True":
             opts['plot_losses'] = True
         elif FLAGS.plot_losses == "False":
             opts['plot_losses'] = False
-    if FLAGS.adversarial_cost_n_filters:
+    if FLAGS.adversarial_cost_n_filters is not None:
         opts['adversarial_cost_n_filters'] = FLAGS.adversarial_cost_n_filters
-    if FLAGS.adv_cost_nlayers:
+    if FLAGS.adv_cost_nlayers is not None:
         opts['adv_cost_nlayers'] = FLAGS.adv_cost_nlayers
-    if FLAGS.adversarial_cost_kernel_size:
+    if FLAGS.adversarial_cost_kernel_size is not None:
         opts['adversarial_cost_kernel_size'] = FLAGS.adversarial_cost_kernel_size
-    if FLAGS.adv_cost_lambda:
+    if FLAGS.adv_cost_lambda is not None:
         opts['adv_cost_lambda'] = FLAGS.adv_cost_lambda
-    if FLAGS.adv_cost_normalise_filter:
+    if FLAGS.adv_cost_normalise_filter is not None:
         opts['adv_cost_normalise_filter'] = FLAGS.adv_cost_normalise_filter
-    if FLAGS.pixel_wise_l2:
+    if FLAGS.pixel_wise_l2 is not None:
         opts['pixel_wise_l2'] = FLAGS.pixel_wise_l2
-    if FLAGS.encoder_num_filters:
+    if FLAGS.encoder_num_filters is not None:
         opts['encoder_num_filters'] = FLAGS.encoder_num_filters
-    if FLAGS.decoder_num_filters:
+    if FLAGS.decoder_num_filters is not None:
         opts['decoder_num_filters'] = FLAGS.decoder_num_filters
-    if FLAGS.encoder_num_layers:
+    if FLAGS.encoder_num_layers is not None:
         opts['encoder_num_layers'] = FLAGS.encoder_num_layers
-    if FLAGS.decoder_num_layers:
+    if FLAGS.decoder_num_layers is not None:
         opts['decoder_num_layers'] = FLAGS.decoder_num_layers
-    if FLAGS.l2_lambda:
+    if FLAGS.l2_lambda is not None:
         opts['l2_lambda'] = FLAGS.l2_lambda
-    if FLAGS.patch_classifier_lambda:
+    if FLAGS.patch_classifier_lambda is not None:
         opts['patch_classifier_lambda'] = FLAGS.patch_classifier_lambda
 
     model = wae.Model(opts)
