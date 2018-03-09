@@ -763,4 +763,4 @@ def data_augmentation_init(model):
         image = tf.minimum(tf.maximum(image, 0.0), 1.0)
         return image
 
-    model.distorted_inputs = lambda: tf.map_fn(_distort_func, real_points, parallel_iterations=100)
+    model.distorted_inputs = tf.map_fn(_distort_func, real_points, parallel_iterations=100)
