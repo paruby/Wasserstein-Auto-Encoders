@@ -94,13 +94,13 @@ class Model(object):
                 self.sess.run(
                     self.train_step,
                     feed_dict={self.learning_rate: lr,
-                               self.input: self.sample_minibatch(self.batch_size, augment)}
+                               self.input: self.sample_minibatch(batch_size=self.batch_size, augment=augment)}
                     )
                 if self.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm', 'normalised_conv_adv']:
                     self.sess.run(
                         self.adv_cost_train_step,
                         feed_dict={self.learning_rate: lr,
-                                   self.input: self.sample_minibatch(self.batch_size, augment)}
+                                   self.input: self.sample_minibatch(batch_size=self.batch_size, augment=augment)}
                         )
 
                 if (self.opts['print_log_information'] is True) and (it % 100 == 0):
