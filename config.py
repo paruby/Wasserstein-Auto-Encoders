@@ -348,6 +348,7 @@ cifar_dcgan_ae_opts['encoder_num_layers'] = 4
 cifar_dcgan_ae_opts['decoder_num_filters'] = 1024
 cifar_dcgan_ae_opts['decoder_num_layers'] = 4
 cifar_dcgan_ae_opts['conv_filter_dim'] = 4
+cifar_dcgan_ae_opts['data_augmentation'] = True
 
 cifar_dcgan_ae_opts['z_mean_activation'] = None
 cifar_dcgan_ae_opts['encoder_distribution'] = 'deterministic'
