@@ -200,7 +200,7 @@ def loss_init(model):
                 w = tf.get_variable('adv_filter_layer2_%d' % kernel_size,[1, 1, n_filters, 1],
                                     initializer=tf.truncated_normal_initializer(stddev=0.01))
                 w = tf.nn.l2_normalize(w, 2)
-                
+
                 real_img_repr = tf.nn.conv2d(real_img_repr, w, strides=[1,1,1,1], padding="SAME")
                 real_img_logits = tf.reshape(real_img_repr, shape=[-1, height*width])
                 fake_img_repr = tf.nn.conv2d(fake_img_repr, w, strides=[1,1,1,1], padding="SAME")
@@ -739,3 +739,28 @@ def _decoder_FC_dsprites_init(model):
 
 def lrelu(alpha, inputs):
     return tf.maximum(inputs, alpha*inputs)
+
+
+def data_augmentation_init(model):
+    height = model.data_dims[0]
+    width = model.data_dims[1]
+    depth = model.data_dims[2]
+    image = model.input
+    def _distort_func(image):
+        # tf.image.per_image_standardization(image), should we?
+        # Pad with zeros.
+        image = tf.image.resize_image_with_crop_or_pad(
+            image, height+4, width+4)
+        image = tf.random_crop(image, [height, width, depth])
+        image = tf.image.random_flip_left_right(image)
+        image = tf.image.random_brightness(image, max_delta=0.1)
+        image = tf.minimum(tf.maximum(image, 0.0), 1.0)
+        image = tf.image.random_contrast(image, lower=0.8, upper=1.3)
+        image = tf.minimum(tf.maximum(image, 0.0), 1.0)
+        image = tf.image.random_hue(image, 0.08)
+        image = tf.minimum(tf.maximum(image, 0.0), 1.0)
+        image = tf.image.random_saturation(image, lower=0.8, upper=1.3)
+        image = tf.minimum(tf.maximum(image, 0.0), 1.0)
+        return image
+
+    model.distorted_inputs = lambda: tf.map_fn(_distort_func, real_points, parallel_iterations=100)

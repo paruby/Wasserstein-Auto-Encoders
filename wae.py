@@ -42,6 +42,8 @@ class Model(object):
         models.prior_init(self)
         models.loss_init(self)
         models.optimizer_init(self)
+        if 'data_augmentation' in self.opts and self.opts['data_augmentation'] is True:
+            models.data_augmentation_init(self)
 
         self.fixed_test_sample = self.sample_minibatch(test=True, seed=0)
         self.fixed_train_sample = self.sample_minibatch(test=False, seed=0)
@@ -66,6 +68,10 @@ class Model(object):
         print("Model restored from : %s" % model_path)
 
     def train(self, it=0):
+        if 'data_augmentation' in self.opts and self.opts['data_augmentation'] is True:
+            augment = True
+        else:
+            augment = False
         print("Beginning training")
         if self.opts['optimizer'] == 'adam':
             learning_rates = [i[0] for i in self.opts['learning_rate_schedule']]
@@ -88,13 +94,13 @@ class Model(object):
                 self.sess.run(
                     self.train_step,
                     feed_dict={self.learning_rate: lr,
-                               self.input: self.sample_minibatch(self.batch_size)}
+                               self.input: self.sample_minibatch(self.batch_size, augment)}
                     )
                 if self.opts['loss_reconstruction'] in ['L2_squared+adversarial', 'L2_squared+adversarial+l2_filter', 'L2_squared+multilayer_conv_adv', 'L2_squared+adversarial+l2_norm', 'normalised_conv_adv']:
                     self.sess.run(
                         self.adv_cost_train_step,
                         feed_dict={self.learning_rate: lr,
-                                   self.input: self.sample_minibatch(self.batch_size)}
+                                   self.input: self.sample_minibatch(self.batch_size, augment)}
                         )
 
                 if (self.opts['print_log_information'] is True) and (it % 100 == 0):
@@ -139,7 +145,7 @@ class Model(object):
             np.random.set_state(st0)
         return codes
 
-    def sample_minibatch(self, batch_size=None, test=False, seed=None):
+    def sample_minibatch(self, batch_size=None, test=False, seed=None, augment=False):
         if seed is not None:
             st0 = np.random.get_state()
             np.random.seed(seed)
@@ -149,6 +155,9 @@ class Model(object):
             sample = self.train_data[np.random.choice(range(len(self.train_data)), batch_size, replace=False)]
         else:
             sample = self.test_data[np.random.choice(range(len(self.test_data)), batch_size, replace=False)]
+
+        if augment is True and 'data_augmentation' in self.opts and self.opts['data_augmentation'] is True:
+            sample = self.sess.run(self.distorted_inputs, feed_dict={self.input: sample})
         if seed is not None:
             np.random.set_state(st0)
         return sample
