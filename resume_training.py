@@ -2,6 +2,7 @@ import os
 import sys
 import wae
 import pickle
+import tensorflow as tf
 
 experiment_path = sys.argv[1]
 
