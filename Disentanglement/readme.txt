@@ -1,13 +1,13 @@
 Each experiment that is run will produce a folder of results in the folder
 dsprites. To run, invoke e.g.
 
-python execute_all.py dsprites 16 100 3.0 100
+python execute_all.py dsprites 16 400 3.0 100
 
 Explanation of parameters:
 
 dsprites - dataset name. In the current version of code published on github, you have no choice but to use dsprites
 16 - latent space dimensionality
-100 - Lambda for MMD divergence term in loss function
+400 - Lambda for MMD divergence term in loss function
 3.0 - Lambda_L1 for L1 penalty on log-variances
 100 - Batch size. Note that MMD memory requirements scale quadratically with batch size. 
 
